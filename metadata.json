@@ -1,0 +1,9 @@
+{
+  "name": "ok-e-store-9.0",
+  "description": "मोबाइल एसेसरीज इलेक्ट्रॉनिक एसेसरीज e-book बुक ज्वैलरी शूज खरीद सकते हैं",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
