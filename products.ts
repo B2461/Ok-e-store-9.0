@@ -29,6 +29,34 @@ export const products: Product[] = [
     reviewVideoUrl: ''
   },
   {
+    id: 'm-009',
+    name: 'Selfie Stick',
+    description: 'Extendable selfie stick with bluetooth remote. Compatible with most smartphones. Free Size.',
+    mrp: 249,
+    discountPercentage: 20,
+    colors: ['Black'],
+    sizes: ['Free Size'],
+    imageUrl1: 'https://res.cloudinary.com/de2eehtiy/image/upload/v1764500392/ms_1fjde_512_178989246_h1x98k.jpg',
+    imageUrl2: 'https://res.cloudinary.com/de2eehtiy/image/upload/v1764500393/ms_tcslp_512_178989246_qrt6kb.jpg',
+    category: 'Mobile Accessories',
+    productType: 'PHYSICAL',
+    reviewVideoUrl: 'https://res.cloudinary.com/de2eehtiy/video/upload/v1764500955/InShot_20251117_154610738_ndcxta.mp4'
+  },
+  {
+    id: 'm-010',
+    name: 'speaking bird tools toy',
+    description: 'Speaking bird tools toy. Free size.',
+    mrp: 499,
+    discountPercentage: 20,
+    colors: ['Yellow'],
+    sizes: ['Free Size'],
+    imageUrl1: 'https://res.cloudinary.com/de2eehtiy/image/upload/v1764500966/ms_rnknd_512_617611248_fer8jg.jpg',
+    imageUrl2: '',
+    category: 'Mobile Accessories',
+    productType: 'PHYSICAL',
+    reviewVideoUrl: ''
+  },
+  {
     id: 'j-002',
     name: 'गले का हार (Golden Necklace)',
     description: 'फ्री साइज गोल्डन हार। सुंदर डिजाइन जो सभी अवसरों के लिए उपयुक्त है। (Free Size)',
@@ -40,7 +68,7 @@ export const products: Product[] = [
     imageUrl2: 'https://res.cloudinary.com/de2eehtiy/image/upload/v1764500968/ms_nha5k_512_513879333_l6qgz0.jpg',
     category: 'Gems & Jewelry',
     productType: 'PHYSICAL',
-    reviewVideoUrl: ''
+    reviewVideoUrl: 'https://res.cloudinary.com/de2eehtiy/video/upload/v1764095597/5_6129929173419956762_1_hd1rpt.mp4'
   },
   {
     id: 'a-004',
@@ -82,6 +110,6 @@ export const products: Product[] = [
     imageUrl2: 'https://res.cloudinary.com/de2eehtiy/image/upload/v1764572742/ms_10nce_512_559165812_gkdhg0.jpg',
     category: 'Shoes',
     productType: 'PHYSICAL',
-    reviewVideoUrl: ''
+    reviewVideoUrl: 'https://res.cloudinary.com/de2eehtiy/video/upload/v1764095597/5_6129929173419956762_1_hd1rpt.mp4'
   }
 ];
