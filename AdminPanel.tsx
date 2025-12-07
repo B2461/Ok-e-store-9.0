@@ -400,16 +400,14 @@ const CategoryManager: React.FC<{
     onUpdateVisibility: (visibility: Record<string, boolean>) => void;
 }> = ({ visibility, onUpdateVisibility }) => {
     const { t } = useAppContext();
-    const categoryTranslations: Record<string, string> = {
-        spiritual_store: t('spiritual_store'),
-        shopping: t('shopping'),
-        astrology_tools: t('astrology_tools'),
-        ai_tools: t('ai_tools'),
-        lifestyle_info: t('lifestyle_info'),
-        travel_location: t('travel_location'),
-        developer_tools: t('developer_tools'),
-        admin_tools: t('admin_tools'),
-    };
+    const productCategoriesControl = [
+        { id: 'product_ebooks', label: 'E-Books (Tantra Mantra)' },
+        { id: 'product_pujan', label: 'Pujan Samagri' },
+        { id: 'product_gems', label: 'Gems & Jewelry' },
+        { id: 'product_mobile', label: 'Mobile Accessories' },
+        { id: 'product_shoes', label: 'Shoes' },
+        { id: 'product_accessories', label: 'Accessories' },
+    ];
 
     const handleToggle = (categoryName: string) => {
         onUpdateVisibility({
@@ -421,22 +419,28 @@ const CategoryManager: React.FC<{
     return (
         <Card>
             <h2 className="text-3xl font-hindi font-bold mb-6 text-center">कैटेगरी कंट्रोल</h2>
-            <p className="text-center text-purple-300 mb-6">चुनें कि कौन सी टूल कैटेगरी मुख्य स्क्रीन पर दिखाई देंगी।</p>
-            <div className="max-h-[60vh] overflow-y-auto space-y-4 pr-2">
-                {toolCategories.map(category => (
-                    <div key={category.name} className="flex justify-between items-center p-4 bg-white/5 rounded-lg border border-white/20">
-                        <span className="font-semibold text-white">{categoryTranslations[category.name] || category.name}</span>
-                        <div
-                            onClick={() => handleToggle(category.name)}
-                            className={`auto-pay-toggle ${(visibility[category.name] ?? true) ? 'active' : ''}`}
-                            role="switch"
-                            aria-checked={visibility[category.name] ?? true}
-                            aria-label={`Toggle visibility for ${category.name}`}
-                        >
-                            <div className="auto-pay-toggle-knob"></div>
-                        </div>
+            <p className="text-center text-purple-300 mb-6">चुनें कि कौन से उत्पाद अनुभाग मुख्य स्क्रीन पर दिखाई देंगे।</p>
+            
+            <div className="max-h-[60vh] overflow-y-auto space-y-6 pr-2">
+                <div>
+                    <h3 className="text-xl font-bold text-purple-300 border-b border-purple-500/20 pb-2 mb-4">उत्पाद अनुभाग</h3>
+                    <div className="space-y-4">
+                        {productCategoriesControl.map(category => (
+                            <div key={category.id} className="flex justify-between items-center p-4 bg-white/5 rounded-lg border border-white/20">
+                                <span className="font-semibold text-white">{category.label}</span>
+                                <div
+                                    onClick={() => handleToggle(category.id)}
+                                    className={`auto-pay-toggle ${(visibility[category.id] ?? true) ? 'active' : ''}`}
+                                    role="switch"
+                                    aria-checked={visibility[category.id] ?? true}
+                                    aria-label={`Toggle visibility for ${category.label}`}
+                                >
+                                    <div className="auto-pay-toggle-knob"></div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                ))}
+                </div>
             </div>
         </Card>
     );

@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Product, ProductCategory } from '../types';
 import Card from './Card';
+import { useAppContext } from '../App';
 
 interface PujanSamagriStoreProps {
     products: Product[];
@@ -9,28 +10,45 @@ interface PujanSamagriStoreProps {
 
 const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
     const discountedPrice = product.mrp - (product.mrp * product.discountPercentage / 100);
+    const { wishlist, toggleWishlist } = useAppContext();
+    const isLiked = wishlist.includes(product.id);
 
     return (
-        <Link to={`/product/${product.id}`} className="group block">
+        <div className="group block relative">
             <Card className="p-4 h-full flex flex-col justify-between !bg-white/5 hover:!bg-purple-500/10 transition-all duration-300">
-                <div className="overflow-hidden rounded-lg mb-4">
-                    <img 
-                        src={product.imageUrl1} 
-                        alt={product.name} 
-                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
+                <div className="relative overflow-hidden rounded-lg mb-4 icon-glow-saffron">
+                    <Link to={`/product/${product.id}`}>
+                        <img 
+                            src={product.imageUrl1} 
+                            alt={product.name} 
+                            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                    </Link>
+                    <button
+                        onClick={(e) => {
+                            e.preventDefault(); // Prevent navigation
+                            toggleWishlist(product.id);
+                        }}
+                        className="absolute top-2 right-2 z-10 p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 transition-all active:scale-95"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 transition-colors ${isLiked ? 'text-pink-500 fill-pink-500' : 'text-white/70'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={isLiked ? 0 : 2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                    </button>
                 </div>
-                <div>
-                    <h3 className="text-lg font-hindi font-bold text-white truncate">{product.name}</h3>
-                    <div className="flex items-center gap-3 mt-2">
-                        <p className="text-xl font-bold text-pink-400">₹{discountedPrice.toFixed(2)}</p>
-                        {product.discountPercentage > 0 && (
-                            <p className="text-md text-purple-300 line-through">₹{product.mrp.toFixed(2)}</p>
-                        )}
+                <Link to={`/product/${product.id}`}>
+                    <div>
+                        <h3 className="text-lg font-hindi font-bold text-white truncate">{product.name}</h3>
+                        <div className="flex items-center gap-3 mt-2">
+                            <p className="text-xl font-bold text-pink-400">₹{discountedPrice.toFixed(2)}</p>
+                            {product.discountPercentage > 0 && (
+                                <p className="text-md text-purple-300 line-through">₹{product.mrp.toFixed(2)}</p>
+                            )}
+                        </div>
                     </div>
-                </div>
+                </Link>
             </Card>
-        </Link>
+        </div>
     );
 };
 

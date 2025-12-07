@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Product } from '../types';
 import { Link } from 'react-router-dom';
+import { useAppContext } from '../App';
 
 interface SearchModalProps {
     products: Product[];
@@ -11,6 +12,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ products, onClose }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const modalRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const { wishlist, toggleWishlist } = useAppContext();
 
     const filteredProducts = useMemo(() => {
         if (!searchTerm.trim()) {
@@ -79,24 +81,37 @@ const SearchModal: React.FC<SearchModalProps> = ({ products, onClose }) => {
                     {searchTerm.trim() && filteredProducts.length > 0 && (
                         filteredProducts.map(product => {
                              const discountedPrice = product.mrp - (product.mrp * product.discountPercentage / 100);
+                             const isLiked = wishlist.includes(product.id);
                              return (
-                                <Link
-                                    key={product.id}
-                                    to={`/product/${product.id}`}
-                                    onClick={onClose}
-                                    className="flex items-center gap-4 p-3 bg-white/5 rounded-lg border border-transparent hover:border-purple-500/50 hover:bg-purple-900/20 transition-all"
-                                >
-                                    <img src={product.imageUrl1} alt={product.name} className="w-16 h-16 object-cover rounded-md flex-shrink-0" />
-                                    <div className="flex-grow overflow-hidden">
-                                        <h3 className="font-hindi font-semibold text-white truncate">{product.name}</h3>
-                                        <div className="flex items-baseline gap-2 mt-1">
-                                            <p className="text-lg font-bold text-pink-400">₹{discountedPrice.toFixed(0)}</p>
-                                            {product.discountPercentage > 0 && (
-                                                <p className="text-xs text-purple-300 line-through">₹{product.mrp.toFixed(0)}</p>
-                                            )}
+                                <div key={product.id} className="relative group">
+                                    <Link
+                                        to={`/product/${product.id}`}
+                                        onClick={onClose}
+                                        className="flex items-center gap-4 p-3 bg-white/5 rounded-lg border border-transparent hover:border-purple-500/50 hover:bg-purple-900/20 transition-all"
+                                    >
+                                        <img src={product.imageUrl1} alt={product.name} className="w-16 h-16 object-cover rounded-md flex-shrink-0 icon-glow-saffron" />
+                                        <div className="flex-grow overflow-hidden pr-8">
+                                            <h3 className="font-hindi font-semibold text-white truncate">{product.name}</h3>
+                                            <div className="flex items-baseline gap-2 mt-1">
+                                                <p className="text-lg font-bold text-pink-400">₹{discountedPrice.toFixed(0)}</p>
+                                                {product.discountPercentage > 0 && (
+                                                    <p className="text-xs text-purple-300 line-through">₹{product.mrp.toFixed(0)}</p>
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                </Link>
+                                    </Link>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            toggleWishlist(product.id);
+                                        }}
+                                        className="absolute top-1/2 right-4 -translate-y-1/2 p-2 rounded-full hover:bg-white/10 transition-colors"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 transition-colors ${isLiked ? 'text-pink-500 fill-pink-500' : 'text-white/50 hover:text-white'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={isLiked ? 0 : 2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                        </svg>
+                                    </button>
+                                </div>
                              )
                         })
                     )}

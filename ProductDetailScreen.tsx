@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, FormEvent } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Product } from '../types';
@@ -11,6 +10,50 @@ const dummyComments = [
     { author: 'सुनीता', text: 'उत्कृष्ट गुणवत्ता और पैकेजिंग। धन्यवाद!' }
 ];
 
+// Reusable Product Card component for Related Products
+const RelatedProductCard: React.FC<{ product: Product }> = ({ product }) => {
+    const discountedPrice = product.mrp - (product.mrp * product.discountPercentage / 100);
+    const { wishlist, toggleWishlist } = useAppContext();
+    const isLiked = wishlist.includes(product.id);
+
+    return (
+        <div className="group block flex-none w-40 sm:w-48 relative">
+            <Card className="p-3 h-full flex flex-col justify-between !bg-white/5 hover:!bg-purple-500/10 transition-all duration-300">
+                <div className="relative overflow-hidden rounded-lg mb-3 icon-glow-saffron">
+                    <Link to={`/product/${product.id}`}>
+                        <img
+                            src={product.imageUrl1}
+                            alt={product.name}
+                            className="w-full h-28 sm:h-32 object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                    </Link>
+                    <button
+                        onClick={(e) => {
+                            e.preventDefault();
+                            toggleWishlist(product.id);
+                        }}
+                        className="absolute top-1 right-1 z-10 p-1.5 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 transition-all active:scale-95"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 transition-colors ${isLiked ? 'text-pink-500 fill-pink-500' : 'text-white/70'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={isLiked ? 0 : 2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                    </button>
+                </div>
+                <Link to={`/product/${product.id}`}>
+                    <div>
+                        <h3 className="text-sm font-hindi font-bold text-white truncate">{product.name}</h3>
+                        <div className="flex items-baseline gap-2 mt-1">
+                            <p className="text-lg font-bold text-pink-400">₹{discountedPrice.toFixed(0)}</p>
+                            {product.discountPercentage > 0 && (
+                                <p className="text-xs text-purple-300 line-through">₹{product.mrp.toFixed(0)}</p>
+                            )}
+                        </div>
+                    </div>
+                </Link>
+            </Card>
+        </div>
+    );
+};
 
 interface ProductDetailScreenProps {
     products: Product[];
@@ -19,7 +62,7 @@ interface ProductDetailScreenProps {
 
 const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ products, addToCart }) => {
     const { productId } = useParams<{ productId: string }>();
-    const { t } = useAppContext();
+    const { t, wishlist, toggleWishlist } = useAppContext();
     const [quantity, setQuantity] = useState(1);
     const [selectedColor, setSelectedColor] = useState<string>('');
     const [selectedSize, setSelectedSize] = useState<string>('');
@@ -29,7 +72,6 @@ const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ products, add
     const [showFullScreen, setShowFullScreen] = useState(false);
 
     // New state for social features
-    const [isLiked, setIsLiked] = useState(false);
     const [isCopied, setIsCopied] = useState(false);
     const [showComments, setShowComments] = useState(false);
     const [comments, setComments] = useState<{ author: string; text: string }[]>([]);
@@ -37,6 +79,12 @@ const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ products, add
 
 
     const product = products.find(p => p.id === productId);
+    const isLiked = product ? wishlist.includes(product.id) : false;
+    
+    // Calculate related products based on category, excluding the current product
+    const relatedProducts = products.filter(
+        p => p.category === product?.category && p.id !== product.id
+    ).slice(0, 6); // Limit to 6 related products
 
     useEffect(() => {
         if (product) {
@@ -55,6 +103,10 @@ const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ products, add
                     setSelectedSize(product.sizes[0]);
                 }
             }
+             // Reset quantity and addedToCart state when product changes
+            setQuantity(1);
+            setAddedToCart(false);
+            setError(null);
         }
     }, [product]);
 
@@ -158,7 +210,7 @@ const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ products, add
                 </div>
             )}
 
-            <Card className="animate-fade-in">
+            <Card className="animate-fade-in mb-8">
                  <Link to="/store" className="absolute top-6 left-6 text-purple-300 hover:text-white transition">&larr; स्टोर पर वापस</Link>
                 <div className="grid md:grid-cols-2 gap-8 items-start">
                     <div>
@@ -298,11 +350,11 @@ const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ products, add
                 {/* Social Interaction Section */}
                 <div className="mt-8 pt-6 border-t border-white/20">
                     <div className="flex items-center justify-around">
-                         <button onClick={() => setIsLiked(!isLiked)} className={`flex flex-col items-center gap-1 text-purple-300 hover:text-white transition-colors duration-200 ${isLiked ? 'like-btn-liked' : ''}`}>
-                            <svg xmlns="http://www.w3.org/2000/svg" className={`h-8 w-8 transition-transform duration-300 ${isLiked ? 'like-animation' : ''}`} viewBox="0 0 24 24" fill={isLiked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                         <button onClick={() => toggleWishlist(product.id)} className={`flex flex-col items-center gap-1 hover:text-white transition-colors duration-200 ${isLiked ? 'text-pink-500' : 'text-purple-300'}`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" className={`h-8 w-8 transition-transform duration-300 ${isLiked ? 'scale-110' : ''}`} viewBox="0 0 24 24" fill={isLiked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={isLiked ? 0 : 2} strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                             </svg>
-                            <span className="text-xs font-semibold">पसंद</span>
+                            <span className="text-xs font-semibold">{isLiked ? 'पसंद किया' : 'पसंद'}</span>
                         </button>
                          <button onClick={handleShare} className="flex flex-col items-center gap-1 text-purple-300 hover:text-white transition-colors duration-200">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -345,6 +397,22 @@ const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ products, add
                     )}
                 </div>
             </Card>
+
+            {/* Related Products Section */}
+            {relatedProducts.length > 0 && (
+                <div className="mb-8">
+                    <h3 className="text-2xl md:text-3xl font-hindi font-bold text-purple-300 border-b-2 border-purple-500/20 pb-3 mb-6 text-left">
+                        संबंधित उत्पाद
+                    </h3>
+                    <div className="flex overflow-x-auto space-x-4 pb-4 category-tabs" style={{ scrollSnapType: 'x mandatory' }}>
+                        {relatedProducts.map(relProduct => (
+                            <div key={relProduct.id} style={{ scrollSnapAlign: 'start' }}>
+                                <RelatedProductCard product={relProduct} />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
         </>
     );
 };

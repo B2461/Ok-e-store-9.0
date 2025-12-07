@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { DivinationType, ShowcaseTool } from '../types';
 import { useAppContext } from '../App';
@@ -8,6 +9,13 @@ interface ToolShowcaseSliderProps {
 }
 
 const showcaseTools: ShowcaseTool[] = [
+    {
+        type: DivinationType.DIVINATION_STORE,
+        icon: '',
+        description: '',
+        motivationalText: '',
+        imageUrl: 'https://res.cloudinary.com/de2eehtiy/image/upload/v1764846050/b45263c1-c531-4c89-8541-e17ded96197f_tudswh.png'
+    },
     {
         type: DivinationType.MOBILE_ACCESSORIES,
         icon: '📱',
@@ -70,27 +78,37 @@ const ToolShowcaseSlider: React.FC<ToolShowcaseSliderProps> = ({ onSelect }) => 
         <div className="w-full max-w-4xl mx-auto mb-8 relative">
             <div 
                 key={currentIndex} // Re-trigger animation on slide change
-                className="aspect-video bg-white/10 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 p-6 md:p-8 transition-all duration-300 hover:shadow-purple-500/20 flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8 cursor-pointer"
+                className={`aspect-video bg-white/10 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 transition-all duration-300 hover:shadow-purple-500/20 cursor-pointer overflow-hidden ${currentTool.imageUrl ? 'p-0' : 'p-6 md:p-8 flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8'}`}
                 onClick={() => onSelect(currentTool.type)}
                 role="button"
                 tabIndex={0}
                 aria-label={`Select ${toolName.en}`}
             >
-                <div className="w-28 h-28 md:w-32 md:h-32 rounded-full bg-black/20 flex items-center justify-center flex-shrink-0">
-                    <span className="text-7xl md:text-8xl icon-glow icon-float">{currentTool.icon}</span>
-                </div>
-                <div className="text-center md:text-left slide-content-anim">
-                    <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">
-                        <span className="block font-sans">{toolName.en}</span>
-                        <span className="block font-hindi text-xl text-purple-200/90">{toolName.hi}</span>
-                    </h3>
-                    <p className="text-base md:text-lg text-purple-200 mb-3">
-                        {currentTool.description}
-                    </p>
-                    <p className="text-base font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-pink-400 italic">
-                        "{currentTool.motivationalText}"
-                    </p>
-                </div>
+                {currentTool.imageUrl ? (
+                    <img 
+                        src={currentTool.imageUrl} 
+                        alt="Special Offer" 
+                        className="w-full h-full object-fill sm:object-cover"
+                    />
+                ) : (
+                    <>
+                        <div className="w-28 h-28 md:w-32 md:h-32 rounded-full bg-black/20 flex items-center justify-center flex-shrink-0">
+                            <span className="text-7xl md:text-8xl icon-glow icon-float">{currentTool.icon}</span>
+                        </div>
+                        <div className="text-center md:text-left slide-content-anim">
+                            <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">
+                                <span className="block font-sans">{toolName.en}</span>
+                                <span className="block font-hindi text-xl text-purple-200/90">{toolName.hi}</span>
+                            </h3>
+                            <p className="text-base md:text-lg text-purple-200 mb-3">
+                                {currentTool.description}
+                            </p>
+                            <p className="text-base font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-pink-400 italic">
+                                "{currentTool.motivationalText}"
+                            </p>
+                        </div>
+                    </>
+                )}
             </div>
             
             <div className="flex justify-center gap-2.5 mt-4 absolute -bottom-6 left-1/2 -translate-x-1/2">

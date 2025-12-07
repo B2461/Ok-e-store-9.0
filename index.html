@@ -15,6 +15,11 @@
             background-attachment: fixed;
             transition: background 0.8s ease-in-out;
         }
+        
+        /* Global Tap Highlight Color for Mobile - Dark Green */
+        * {
+            -webkit-tap-highlight-color: rgba(0, 100, 0, 0.3) !important;
+        }
 
         body[data-theme="cosmic"] {
             background-color: #050200; /* Dark base color */
@@ -432,11 +437,38 @@
         }
 
         @keyframes icon-glow-saffron {
-            0%, 100% { text-shadow: 0 0 8px #f97316, 0 0 12px #f97316; }
-            50% { text-shadow: 0 0 12px #f97316, 0 0 20px #ea580c, 0 0 3px #fff; }
+            0%, 100% { filter: drop-shadow(0 0 5px rgba(249, 115, 22, 0.7)); }
+            50% { filter: drop-shadow(0 0 20px rgba(249, 115, 22, 1)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.5)); }
         }
         .icon-glow-saffron {
-            animation: icon-glow-saffron 3s ease-in-out infinite;
+            animation: icon-glow-saffron 8s ease-in-out infinite;
+        }
+
+        /* Click Flash Animation */
+        @keyframes click-flash-green {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0.8; }
+            100% { transform: translate(-50%, -50%) scale(2.0); opacity: 0; }
+        }
+        .click-flash-effect {
+            position: fixed;
+            width: 40px;
+            height: 40px;
+            /* Dark Green Flash */
+            background: radial-gradient(circle, rgba(0, 100, 0, 0.9) 0%, rgba(0, 100, 0, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            animation: click-flash-green 0.4s ease-out forwards;
+        }
+
+        /* Green Flash Pulse Animation for Header Icons */
+        @keyframes flash-green {
+            0% { filter: drop-shadow(0 0 0 transparent); transform: scale(1); }
+            50% { filter: drop-shadow(0 0 15px #22c55e); transform: scale(1.1); color: #22c55e; }
+            100% { filter: drop-shadow(0 0 0 transparent); transform: scale(1); }
+        }
+        .animate-flash-green {
+            animation: flash-green 2s infinite ease-in-out;
         }
 
         /* Category Tabs Scrollbar Hiding */

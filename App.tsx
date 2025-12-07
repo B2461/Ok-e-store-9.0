@@ -1,31 +1,33 @@
-
 import React, { useState, useCallback, useEffect, useRef, createContext, useContext, useMemo } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { DivinationType, CartItem, Order, CustomerDetails, Product, Notification, UserProfile, VerificationRequest, SupportTicket, SocialMediaPost } from './types';
-import WelcomeScreen from './components/WelcomeScreen';
-import SelectionScreen from './components/SelectionScreen';
-import SettingsScreen from './components/SettingsScreen';
-import PujanSamagriStore from './components/PujanSamagriStore';
-import ProductDetailScreen from './components/ProductDetailScreen';
-import ShoppingCartScreen from './components/ShoppingCartScreen';
-import CheckoutScreen from './components/CheckoutScreen';
-import OrderConfirmationScreen from './components/OrderConfirmationScreen';
-import { products as initialProducts } from './data/products';
-import { ebooks } from './data/ebooks';
-import NotificationBell from './components/NotificationBell';
-import AdminScreen from './components/AdminScreen';
-import TermsAndConditions from './components/TermsAndConditions';
-import PrivacyPolicy from './components/PrivacyPolicy';
-import { toolCategories } from './data/tools';
-import ProfileScreen from './components/ProfileScreen';
-import BottomNavBar from './components/BottomNavBar';
-import LoginScreen from './components/LoginScreen';
-import OrderHistoryScreen from './components/OrderHistoryScreen';
-import SupportTicketScreen from './components/SupportTicketScreen';
-import AudioPlayer from './components/AudioPlayer';
-import SearchModal from './components/SearchModal';
-import LocalMarketingScreen from './components/LocalMarketingScreen';
-import { subscribeToAuthChanges, loginUser, registerUser, logoutUser } from './services/firebaseService';
+import { DivinationType, CartItem, Order, CustomerDetails, Product, Notification, UserProfile, VerificationRequest, SupportTicket, SocialMediaPost, SubscriptionPlan } from '../types';
+import WelcomeScreen from './WelcomeScreen';
+import SelectionScreen from './SelectionScreen';
+import SettingsScreen from './SettingsScreen';
+import PujanSamagriStore from './PujanSamagriStore';
+import ProductDetailScreen from './ProductDetailScreen';
+import ShoppingCartScreen from './ShoppingCartScreen';
+import CheckoutScreen from './CheckoutScreen';
+import OrderConfirmationScreen from './OrderConfirmationScreen';
+import { products as initialProducts } from '../data/products';
+import { ebooks } from '../data/ebooks';
+import NotificationBell from './NotificationBell';
+import AdminScreen from './AdminScreen';
+import TermsAndConditions from './TermsAndConditions';
+import PrivacyPolicy from './PrivacyPolicy';
+import { toolCategories } from '../data/tools';
+import ProfileScreen from './ProfileScreen';
+import BottomNavBar from './BottomNavBar';
+import LoginScreen from './LoginScreen';
+import OrderHistoryScreen from './OrderHistoryScreen';
+import SupportTicketScreen from './SupportTicketScreen';
+import AudioPlayer from './AudioPlayer';
+import SearchModal from './SearchModal';
+import LocalMarketingScreen from './LocalMarketingScreen';
+import PremiumScreen from './PremiumScreen';
+import SubscriptionPaymentScreen from './SubscriptionPaymentScreen';
+import SubscriptionConfirmationScreen from './SubscriptionConfirmationScreen';
+import { subscribeToAuthChanges, loginUser, registerUser, logoutUser } from '../services/firebaseService';
 
 // --- I18n Language & Auth System ---
 const translations = {
@@ -43,7 +45,7 @@ const translations = {
     special_offer_message: 'हमारी नई पूजन सामग्री स्टोर देखें।',
     music: 'संगीत',
     admin: 'एडमिन',
-    notifications: 'सूचना',
+    notifications: 'Alert',
     profile: 'प्रोफ़ाइल',
     cart: 'कार्ट',
     search: 'खोज',
@@ -62,14 +64,6 @@ const translations = {
     // Selection Screen Categories
     spiritual_store: 'आध्यात्मिक स्टोर',
     shopping: 'शॉपिंग',
-    mobile_accessories: 'मोबाइल एक्सेसरीज',
-    fashion_lifestyle: 'फैशन और लाइफस्टाइल',
-    astrology_tools: 'ज्योतिष उपकरण',
-    love_relationships: 'प्रेम और संबंध',
-    ai_tools: 'AI टूल्स',
-    lifestyle_info: 'जीवनशैली और जानकारी',
-    travel_location: 'यात्रा और स्थान',
-    developer_tools: 'डेवलपर टूल्स',
     admin_tools: 'एडमिन उपकरण',
     // Support System
     support_and_help: 'सहायता और समर्थन',
@@ -93,6 +87,26 @@ const translations = {
     generate_post: 'पोस्ट बनाएं',
     update_post: 'पोस्ट अपडेट करें',
     recent_posts: 'हाल की पोस्ट्स',
+    // Premium
+    premium_unlock_title: 'प्रीमियम अनलॉक करें',
+    premium_unlock_subtitle: 'सभी ज्योतिष और AI टूल्स तक असीमित पहुंच प्राप्त करें।',
+    premium_trial_banner_title: 'मुफ्त ट्रायल उपलब्ध!',
+    premium_trial_banner_desc: 'आज ही साइन अप करें और 3 दिन मुफ्त पाएं।',
+    premium_monthly_plan: 'मासिक प्लान',
+    premium_yearly_plan: 'वार्षिक प्लान',
+    premium_choose_plan: 'प्लान चुनें',
+    payment_title: 'भुगतान',
+    payment_your_name: 'आपका नाम',
+    payment_your_phone: 'आपका फोन नंबर',
+    payment_enter_txn_id: '12-अंकीय लेनदेन आईडी दर्ज करें',
+    payment_paid_button: 'भुगतान हो गया',
+    payment_verifying_title: 'सत्यापन जारी है',
+    payment_verifying_subtitle: 'हम आपके भुगतान की पुष्टि कर रहे हैं।',
+    payment_after_instruction: 'भुगतान के बाद, ट्रांजेक्शन आईडी दर्ज करें और स्क्रीनशॉट अपलोड करें।',
+    payment_invalid_txn_id: 'अमान्य ट्रांजेक्शन आईडी।',
+    sub_confirm_title: 'सदस्यता अनुरोध प्राप्त हुआ!',
+    sub_confirm_message: 'आपका अनुरोध प्रक्रियाधीन है। भुगतान सत्यापित होने के बाद प्रीमियम सुविधाएं सक्रिय हो जाएंगी।',
+    sub_confirm_button: 'होम पर जाएं',
   },
   en: {
     // General UI
@@ -108,7 +122,7 @@ const translations = {
     special_offer_message: 'Check out our new spiritual items store.',
     music: 'Music',
     admin: 'Admin',
-    notifications: 'Notifications',
+    notifications: 'Alert',
     profile: 'Profile',
     cart: 'Cart',
     search: 'Search',
@@ -127,14 +141,6 @@ const translations = {
     // Selection Screen Categories
     spiritual_store: 'Spiritual Store',
     shopping: 'Shopping',
-    mobile_accessories: 'Mobile Accessories',
-    fashion_lifestyle: 'Fashion & Lifestyle',
-    astrology_tools: 'Astrology Tools',
-    love_relationships: 'Love & Relationships',
-    ai_tools: 'AI Tools',
-    lifestyle_info: 'Lifestyle & Info',
-    travel_location: 'Travel & Location',
-    developer_tools: 'Developer Tools',
     admin_tools: 'Admin Tools',
     // Support System
     support_and_help: 'Support & Help',
@@ -158,6 +164,26 @@ const translations = {
     generate_post: 'Generate Post',
     update_post: 'Update Post',
     recent_posts: 'Recent Posts',
+    // Premium
+    premium_unlock_title: 'Unlock Premium',
+    premium_unlock_subtitle: 'Get unlimited access to all Astrology and AI tools.',
+    premium_trial_banner_title: 'Free Trial Available!',
+    premium_trial_banner_desc: 'Sign up today and get 3 days free.',
+    premium_monthly_plan: 'Monthly Plan',
+    premium_yearly_plan: 'Yearly Plan',
+    premium_choose_plan: 'Choose Plan',
+    payment_title: 'Payment',
+    payment_your_name: 'Your Name',
+    payment_your_phone: 'Your Phone Number',
+    payment_enter_txn_id: 'Enter 12-digit Transaction ID',
+    payment_paid_button: 'I Have Paid',
+    payment_verifying_title: 'Verifying Payment',
+    payment_verifying_subtitle: 'We are verifying your payment details.',
+    payment_after_instruction: 'After payment, enter Transaction ID and upload screenshot.',
+    payment_invalid_txn_id: 'Invalid Transaction ID.',
+    sub_confirm_title: 'Subscription Request Received!',
+    sub_confirm_message: 'Your request is processing. Premium features will be activated once payment is verified.',
+    sub_confirm_button: 'Go to Home',
   },
 };
 
@@ -395,6 +421,36 @@ const App: React.FC = () => {
     });
     const [isSearchVisible, setIsSearchVisible] = useState(false);
     const audioRef = useRef<HTMLAudioElement>(null);
+    const [selectedSubscriptionPlan, setSelectedSubscriptionPlan] = useState<(SubscriptionPlan & { autoRenew: boolean }) | null>(null);
+
+    // Green Flash Logic States
+    const [flashCart, setFlashCart] = useState(false);
+    const [flashOrder, setFlashOrder] = useState(false);
+    const [flashNotif, setFlashNotif] = useState(false);
+
+    // Track previous lengths to detect additions
+    const prevCartLength = useRef(cartItems.length);
+    const prevOrderLength = useRef(orders.length);
+    const prevNotifLength = useRef(notifications.length);
+
+    // Global Click Listener for Green Flash Effect
+    useEffect(() => {
+        const handleGlobalClick = (e: MouseEvent) => {
+            const flash = document.createElement('div');
+            flash.className = 'click-flash-effect';
+            flash.style.left = `${e.clientX}px`;
+            flash.style.top = `${e.clientY}px`;
+            document.body.appendChild(flash);
+            setTimeout(() => {
+                if (document.body.contains(flash)) {
+                    document.body.removeChild(flash);
+                }
+            }, 500); // Remove after animation
+        };
+
+        window.addEventListener('click', handleGlobalClick);
+        return () => window.removeEventListener('click', handleGlobalClick);
+    }, []);
 
     useEffect(() => { localStorage.setItem('okFutureZoneCartItems', JSON.stringify(cartItems)); }, [cartItems]);
     useEffect(() => { localStorage.setItem('okFutureZoneOrders', JSON.stringify(orders)); setOrders(orders); }, [orders]);
@@ -403,6 +459,29 @@ const App: React.FC = () => {
     useEffect(() => { localStorage.setItem('okFutureZoneSupportTickets', JSON.stringify(supportTickets)); setSupportTickets(supportTickets); }, [supportTickets]);
     useEffect(() => { localStorage.setItem('okFutureZoneSocialMediaPosts', JSON.stringify(socialMediaPosts)); }, [socialMediaPosts]);
     useEffect(() => { localStorage.setItem('okFutureZoneCategoryVisibility', JSON.stringify(categoryVisibility)); }, [categoryVisibility]);
+
+    // Flash Effects for Cart, Orders, Notifications
+    useEffect(() => {
+        if (cartItems.length > prevCartLength.current) {
+            setFlashCart(true);
+        }
+        prevCartLength.current = cartItems.length;
+    }, [cartItems]);
+
+    useEffect(() => {
+        if (orders.length > prevOrderLength.current) {
+            setFlashOrder(true);
+        }
+        prevOrderLength.current = orders.length;
+    }, [orders]);
+
+    useEffect(() => {
+        if (notifications.length > prevNotifLength.current) {
+            setFlashNotif(true);
+        }
+        prevNotifLength.current = notifications.length;
+    }, [notifications]);
+
 
     // Automatic cleanup of orders older than 15 days
     useEffect(() => {
@@ -439,50 +518,49 @@ const App: React.FC = () => {
         }
     }, []);
     
+    // Notification Logic: 3 times a day (every 8 hours) with diverse categories
     useEffect(() => {
-        const NOTIFICATION_INTERVAL = 12 * 60 * 60 * 1000;
-        const CHECK_INTERVAL = 5 * 60 * 1000;
+        // 8 hours in milliseconds
+        const NOTIFICATION_INTERVAL = 8 * 60 * 60 * 1000; 
+        const CHECK_INTERVAL = 5 * 60 * 1000; // Check every 5 mins
+
+        const notificationTemplates = [
+            { icon: '🔮', title: 'आज का राशिफल', message: 'जानें आज सितारे आपके बारे में क्या कहते हैं! अपना भविष्य देखें।' },
+            { icon: '👟', title: 'स्टाइल अलर्ट!', message: 'जूतों के नए कलेक्शन पर भारी छूट। अभी खरीदारी करें!' },
+            { icon: '📚', title: 'ज्ञान बढ़ाएं', message: 'नई ई-बुक्स अब उपलब्ध हैं। सफलता की ओर एक कदम बढ़ाएं।' },
+            { icon: '🕉️', title: 'आध्यात्मिक शांति', message: 'शुद्ध पूजन सामग्री और यंत्र घर मंगवाएं।' },
+            { icon: '🎧', title: 'गैजेट अपडेट', message: 'बेहतरीन मोबाइल एक्सेसरीज सबसे कम दाम में।' },
+            { icon: '💑', title: 'रिश्तों की बात', message: 'विवाह और प्रेम अनुकूलता की जांच करें।' },
+            { icon: '💎', title: 'चमकदार ऑफर', message: 'रत्न और आभूषणों पर विशेष छूट। अभी देखें!' },
+            { icon: '🧘', title: 'स्वास्थ्य और योग', message: 'स्वस्थ जीवन के लिए हमारे योग और आयुर्वेद गाइड पढ़ें।' },
+        ];
+
         const sendProductNotification = () => {
             const lastNotificationTime = parseInt(localStorage.getItem('okFutureZoneLastProductNotification') || '0', 10);
             const now = Date.now();
+            
             if (now - lastNotificationTime > NOTIFICATION_INTERVAL) {
-                if (products.length === 0) return;
-                const randomProduct = products[Math.floor(Math.random() * products.length)];
-                const newNotification: Notification = { id: `product-notif-${now}`, icon: '✨', title: 'विशेष पेशकश!', message: `हमारे खास उत्पाद "${randomProduct.name}" को आज ही खरीदें और शानदार छूट पाएं!`, timestamp: new Date().toISOString(), read: false };
+                // Pick a random template
+                const randomTemplate = notificationTemplates[Math.floor(Math.random() * notificationTemplates.length)];
+                
+                const newNotification: Notification = { 
+                    id: `auto-notif-${now}`, 
+                    icon: randomTemplate.icon, 
+                    title: randomTemplate.title, 
+                    message: randomTemplate.message, 
+                    timestamp: new Date().toISOString(), 
+                    read: false 
+                };
+                
                 setNotifications(prev => [newNotification, ...prev]);
                 localStorage.setItem('okFutureZoneLastProductNotification', now.toString());
             }
         };
+        
         sendProductNotification();
         const intervalId = setInterval(sendProductNotification, CHECK_INTERVAL);
         return () => clearInterval(intervalId);
-    }, [products]);
-
-    const ProfileButton: React.FC = () => {
-        const { isAuthenticated, currentUser, showAuth } = useAppContext();
-        const navigate = useNavigate();
-    
-        const handleClick = () => {
-            if (isAuthenticated) {
-                navigate('/profile');
-            } else {
-                showAuth();
-            }
-        };
-    
-        return (
-            <button onClick={handleClick} className="flex flex-col items-center justify-center w-14 py-1 rounded-lg hover:bg-white/10 transition-colors duration-300">
-                <div className="w-7 h-7 rounded-full bg-white/10 border border-white/20 flex items-center justify-center overflow-hidden">
-                    {isAuthenticated && currentUser?.profilePicture ? (
-                        <img src={currentUser.profilePicture} alt="Profile" className="w-full h-full object-cover" />
-                    ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                    )}
-                </div>
-                 <span className="text-xs font-medium mt-1 text-white">{isAuthenticated ? (currentUser?.name?.split(' ')[0] || t('profile')) : t('login')}</span>
-            </button>
-        );
-    };
+    }, []);
 
     const handleProtectedLink = (path: string) => {
         if (isAuthenticated) { navigate(path); } else { showAuth(() => navigate(path)); }
@@ -496,6 +574,7 @@ const App: React.FC = () => {
             case DivinationType.MOBILE_ACCESSORIES: navigate('/store/mobile-accessories'); break;
             case DivinationType.LADIES_GENTS_BABY_SHOES: navigate('/store/shoes'); break;
             case DivinationType.LADIES_GENTS_ACCESSORIES: navigate('/store/accessories'); break;
+            case DivinationType.DIVINATION_STORE: navigate('/store'); break;
             default: break;
         }
     };
@@ -529,18 +608,22 @@ const App: React.FC = () => {
         setPendingVerifications(prev => prev.filter(r => r.id !== requestId));
     };
 
+    const handleSelectPlan = (plan: SubscriptionPlan & { autoRenew: boolean }) => {
+        setSelectedSubscriptionPlan(plan);
+        navigate('/subscribe');
+    };
+
     return (
         <div className="min-h-screen text-white p-4 pt-20 pb-32">
             {isSearchVisible && <SearchModal products={products} onClose={() => setIsSearchVisible(false)} />}
             <header className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-900 via-black to-orange-900 backdrop-blur-md h-20 flex items-center justify-between px-2 sm:px-4 border-b border-orange-700/50 shadow-[0_2px_15px_rgba(249,115,22,0.4)]">
                 <div className="flex items-center">
-                    <Link to="/home" className="flex items-center gap-3">
+                    <Link to="/home" className="flex items-center">
                         <img 
-                            src="https://res.cloudinary.com/de2eehtiy/image/upload/v1764775363/ChatGPT_Image_Dec_2_2025_07_16_51_AM_itnzej.png" 
-                            alt="Ok-E-store Logo" 
-                            className="h-12 w-12 object-cover rounded-full border-2 border-purple-500/50 shadow-[0_0_10px_rgba(168,85,247,0.5)]" 
+                            src="https://res.cloudinary.com/de2eehtiy/image/upload/v1765044615/logo_vnttdf.png" 
+                            alt="Ok-E-store" 
+                            className="h-16 w-auto object-contain" 
                         />
-                        <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-200 to-pink-200 font-hindi tracking-wide shadow-black drop-shadow-md">Ok-E-store</span>
                     </Link>
                 </div>
                 <div className="flex items-center gap-1">
@@ -548,11 +631,15 @@ const App: React.FC = () => {
                         <SearchIcon isActive={false} />
                         <span className="text-xs text-center font-medium mt-1 text-white">{t('search')}</span>
                     </button>
-                    <button onClick={() => handleProtectedLink('/orders')} className={`flex flex-col items-center justify-center w-14 py-1 rounded-lg transition-colors duration-300 ${location.pathname.startsWith('/orders') ? 'yellow-pulse-highlight' : 'hover:bg-white/10'}`}>
-                        <OrderIcon isActive={location.pathname.startsWith('/orders')} />
+                    <button onClick={() => { setFlashOrder(false); handleProtectedLink('/orders'); }} className={`flex flex-col items-center justify-center w-14 py-1 rounded-lg transition-colors duration-300 ${location.pathname.startsWith('/orders') ? 'yellow-pulse-highlight' : 'hover:bg-white/10'} ${flashOrder ? 'animate-flash-green' : ''}`}>
+                        <OrderIcon isActive={location.pathname.startsWith('/orders') ? true : false} />
                         <span className={`text-xs text-center font-medium mt-1 ${location.pathname.startsWith('/orders') ? 'text-yellow-300' : 'text-white'}`}>{t('my_orders')}</span>
                     </button>
-                    <Link to="/cart" className={`flex flex-col items-center justify-center w-14 py-1 rounded-lg hover:bg-white/10 transition-colors duration-300 ${location.pathname.startsWith('/cart') ? 'bg-white/10' : ''}`}>
+                    <div className={`flex flex-col items-center justify-center w-14 py-1 text-center rounded-lg hover:bg-white/10 ${flashNotif ? 'animate-flash-green' : ''}`}>
+                        <NotificationBell notifications={notifications} onOpen={() => { setFlashNotif(false); setNotifications(prev => prev.map(n => ({ ...n, read: true }))); }} onClear={() => setNotifications([])} />
+                        <span className="text-xs font-medium text-white mt-1">{t('notifications')}</span>
+                    </div>
+                    <Link to="/cart" onClick={() => setFlashCart(false)} className={`flex flex-col items-center justify-center w-14 py-1 rounded-lg hover:bg-white/10 transition-colors duration-300 ${location.pathname.startsWith('/cart') ? 'bg-white/10' : ''} ${flashCart ? 'animate-flash-green' : ''}`}>
                         <div className="relative">
                             <CartIcon isActive={location.pathname.startsWith('/cart')} />
                             {cartItems.length > 0 && (
@@ -563,11 +650,6 @@ const App: React.FC = () => {
                         </div>
                         <span className="text-xs font-medium mt-1 text-white">{t('cart')}</span>
                     </Link>
-                    <div className="flex flex-col items-center justify-center w-14 py-1 text-center rounded-lg hover:bg-white/10">
-                        <NotificationBell notifications={notifications} onOpen={() => setNotifications(prev => prev.map(n => ({ ...n, read: true })))} onClear={() => setNotifications([])} />
-                        <span className="text-xs font-medium text-white mt-1">{t('notifications')}</span>
-                    </div>
-                    <ProfileButton />
                 </div>
             </header>
 
@@ -588,6 +670,9 @@ const App: React.FC = () => {
                     <Route path="/admin" element={<AdminScreen products={products} onUpdateProducts={setProducts} orders={orders} onUpdateOrders={setOrdersState} pendingVerifications={pendingVerifications} onApproveVerification={onApproveVerification} supportTickets={supportTickets} onUpdateTicket={(t) => setSupportTicketsState(p => p.map(x => x.id === t.id ? t : x))} socialMediaPosts={socialMediaPosts} onCreatePost={(post) => setSocialMediaPosts(p => [...p, {...post, id: `sm-${Date.now()}`, createdAt: new Date().toISOString()}])} onUpdatePost={(post) => setSocialMediaPosts(p => p.map(x => x.id === post.id ? post : x))} onDeletePost={(postId) => setSocialMediaPosts(p => p.filter(x => x.id !== postId))} categoryVisibility={categoryVisibility} onUpdateCategoryVisibility={setCategoryVisibility} />} />
                     <Route path="/terms" element={<TermsAndConditions />} />
                     <Route path="/privacy" element={<PrivacyPolicy />} />
+                    <Route path="/premium" element={<PremiumScreen onSelectPlan={handleSelectPlan} isTrialAvailable={true} onBack={() => navigate('/home')} />} />
+                    <Route path="/subscribe" element={<SubscriptionPaymentScreen plan={selectedSubscriptionPlan} userProfile={currentUser} onVerificationRequest={(req) => { onVerificationRequest(req); navigate('/subscription-confirmed'); }} onBack={() => navigate('/premium')} />} />
+                    <Route path="/subscription-confirmed" element={<SubscriptionConfirmationScreen expiryDate={null} />} />
                 </Routes>
             </div>
 
@@ -595,8 +680,13 @@ const App: React.FC = () => {
             
             <BottomNavBar cartItemCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)} />
 
-            <footer className="fixed bottom-0 left-0 right-0 p-2 text-center text-xs text-orange-400/60 selection:bg-orange-500 selection:text-white">
-                {t('copyright')}
+            <footer className="text-center text-xs text-orange-400/60 mt-12 pb-4">
+                <div className="flex justify-center items-center gap-4 mb-2">
+                    <Link to="/terms" className="hover:text-orange-300 transition underline">{t('terms_and_conditions')}</Link>
+                    <span className="text-orange-400/40">|</span>
+                    <Link to="/privacy" className="hover:text-orange-300 transition underline">{t('privacy_policy')}</Link>
+                </div>
+                <p>{t('copyright')}</p>
             </footer>
         </div>
     );

@@ -190,55 +190,46 @@ export interface Place {
 
 export interface ShowcaseTool {
     type: DivinationType;
+    icon: string;
     description: string;
     motivationalText: string;
-    icon: string;
+    imageUrl?: string;
 }
 
-export interface Notification {
-    id: string;
-    icon: string;
-    title: string; // This will now be a translation key
-    message: string; // This can be a key or a raw string for dynamic content
-    timestamp: string;
-    read: boolean;
-}
+export type ProductCategory = 'Pujan Samagri' | 'Tantra Mantra Yantra E-book' | 'Gems & Jewelry' | 'Mobile Accessories' | 'Shoes' | 'Accessories';
 
-// E-commerce types
-export type ProductCategory = 'Pujan Samagri' | 'Tantra Mantra Yantra E-book' | 'Mobile Accessories' | 'Gems & Jewelry' | 'Shoes' | 'Accessories';
 export type ProductType = 'PHYSICAL' | 'DIGITAL';
 
 export interface Product {
-  id: string;
-  name: string;
-  description: string;
-  mrp: number;
-  discountPercentage: number;
-  colors: string[];
-  sizes?: string[]; // Added sizes field
-  imageUrl1: string;
-  imageUrl2: string;
-  category: ProductCategory;
-  productType: ProductType;
-  googleDriveLink?: string;
-  reviewVideoUrl?: string;
+    id: string;
+    name: string;
+    description: string;
+    mrp: number;
+    discountPercentage: number;
+    colors: string[];
+    sizes?: string[];
+    imageUrl1: string;
+    imageUrl2?: string;
+    category: ProductCategory;
+    productType: ProductType;
+    reviewVideoUrl?: string;
+    googleDriveLink?: string;
+    isTrending?: boolean;
 }
 
 export interface CartItem extends Product {
-  quantity: number;
-  selectedColor: string; // Will be 'Digital' for e-books
-  selectedSize?: string; // Added selectedSize field
+    quantity: number;
+    selectedColor: string;
+    selectedSize?: string;
 }
 
 export interface CustomerDetails {
     name: string;
-    phone: string;
-    // Physical address fields
     address?: string;
     city?: string;
     state?: string;
     pincode?: string;
-    // Digital delivery fields
+    phone: string;
     email?: string;
     whatsapp?: string;
 }
@@ -249,12 +240,21 @@ export interface Order {
     customer: CustomerDetails;
     total: number;
     date: string;
-    status: 'Processing' | 'Shipped' | 'Out for Delivery' | 'Delivered' | 'Completed' | 'Payment Pending' | 'Verification Pending';
+    status: 'Processing' | 'Shipped' | 'Out for Delivery' | 'Delivered' | 'Verification Pending' | 'Completed' | 'Payment Pending';
+    paymentMethod: 'PREPAID' | 'COD';
+    paymentStatus: 'PENDING' | 'VERIFICATION_PENDING' | 'COMPLETED' | 'FAILED';
     trackingId?: string;
     carrier?: string;
     adminWpNumber?: string;
-    paymentMethod: 'PREPAID' | 'COD';
-    paymentStatus: 'PENDING' | 'COMPLETED' | 'VERIFICATION_PENDING';
+}
+
+export interface Notification {
+    id: string;
+    icon: string;
+    title: string;
+    message: string;
+    timestamp: string;
+    read: boolean;
 }
 
 export interface SubscriptionPlan {

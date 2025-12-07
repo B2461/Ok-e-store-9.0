@@ -1,10 +1,12 @@
 
 import React, { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { DivinationType, Product } from '../types';
-import { toolCategories } from '../data/tools';
 import ToolShowcaseSlider from './ToolShowcaseSlider';
 import { useAppContext } from '../App';
 import ProductShowcaseSlider from './ProductShowcaseSlider';
+import TrendingVideoCollection from './TrendingVideoCollection';
+import { toolCategories } from '../data/tools';
 
 interface SelectionScreenProps {
     onSelect: (type: DivinationType) => void;
@@ -14,7 +16,10 @@ interface SelectionScreenProps {
 }
 
 const SelectionScreen: React.FC<SelectionScreenProps> = ({ onSelect, isPremiumActive, products, categoryVisibility }) => {
-    const { t, tDiv } = useAppContext();
+    const { tDiv, t } = useAppContext();
+
+    // Helper to check if a category is visible (defaults to true if not set)
+    const isVisible = (key: string) => categoryVisibility[key] !== false;
 
     // -- Split products into distinct categories --
     
@@ -45,100 +50,134 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({ onSelect, isPremiumAc
         products.filter(p => p.category === 'Accessories'),
     [products]);
 
-
-    const visibleToolCategories = useMemo(() =>
-        toolCategories.filter(category => categoryVisibility[category.name] ?? true),
-        [categoryVisibility]
-    );
+    const categoryGridItems = [
+        { 
+            id: 'product_pujan', 
+            titleEn: 'WORSHIP ITEMS', 
+            titleHi: 'पूजन सामग्री', 
+            icon: '🛍️', 
+            link: '/store/pujan-samagri' 
+        },
+        { 
+            id: 'product_ebooks', 
+            titleEn: 'TANTRA MANTRA YANTRA PDF E-BOOK', 
+            titleHi: 'तंत्र मंत्र यन्त्र PDF E-book', 
+            icon: '📚', 
+            link: '/store/ebooks' 
+        },
+        { 
+            id: 'product_gems', 
+            titleEn: 'GEMS & JEWELRY', 
+            titleHi: 'रत्न आभूषण', 
+            icon: '💎', 
+            link: '/store/gems-jewelry' 
+        },
+        { 
+            id: 'product_mobile', 
+            titleEn: 'MOBILE ACCESSORIES', 
+            titleHi: 'मोबाइल एक्सेसरीज', 
+            icon: '📱', 
+            link: '/store/mobile-accessories' 
+        },
+        { 
+            id: 'product_shoes', 
+            titleEn: 'LADIES, GENTS & BABY SHOES', 
+            titleHi: 'लेडीज जेंट्स एंड बेबी शूज', 
+            icon: '👟', 
+            link: '/store/shoes' 
+        },
+        { 
+            id: 'product_accessories', 
+            titleEn: 'LADIES & GENTS ACCESSORIES', 
+            titleHi: 'लेडीज एंड जेंट्स पर्स बैग बेल्ट चाबी का गुच्छा', 
+            icon: '👜', 
+            link: '/store/accessories' 
+        }
+    ];
 
     return (
-        <div className="text-center animate-fade-in w-full">
+        <div className="text-center animate-fade-in w-full mt-4">
             <ToolShowcaseSlider onSelect={onSelect} />
 
-            <section className="mt-12">
-                <h2 className="text-2xl md:text-3xl font-hindi font-bold text-purple-300 border-b-2 border-purple-500/20 pb-3 mb-6 text-left">
-                    मुख्य श्रेणियाँ
-                </h2>
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 md:gap-6">
-                    {visibleToolCategories.flatMap(category => category.tools).map((option) => {
-                        const isLocked = option.isPremium && !isPremiumActive;
-                        const toolName = tDiv(option.type);
-                        return (
-                        <button
-                            key={option.type}
-                            onClick={() => onSelect(option.type)}
-                            className={`group relative flex flex-col items-center justify-start gap-3 p-2 sm:p-3 bg-white/5 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 text-center transform transition-all duration-300 ${isLocked ? 'cursor-pointer' : 'hover:bg-purple-500/20 hover:-translate-y-1 hover:shadow-lg hover:shadow-purple-500/30'}`}
-                            aria-label={`${toolName.en} ${isLocked ? '(Locked)' : ''}`}
-                        >
-                            {option.isPremium && (
-                                <div className="absolute top-1 right-1 text-xl z-10" title="प्रीमियम टूल">
-                                    <span className={!isLocked ? 'icon-glow drop-shadow-[0_2px_2px_rgba(0,0,0,1)]' : 'opacity-70'}>💎</span>
+            {/* Main Category Grid - Dark Theme */}
+            <div className="max-w-6xl mx-auto px-4 mb-6">
+                <h2 className="text-2xl font-hindi font-bold text-purple-300 text-left mb-6 ml-1">मुख्य श्रेणियाँ</h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {categoryGridItems.map(cat => (
+                        isVisible(cat.id) && (
+                            <Link key={cat.id} to={cat.link} className="block group">
+                                <div className="h-full flex flex-col items-center justify-center p-6 bg-[#1c1c1e] border border-white/10 rounded-2xl transition-all duration-300 hover:border-purple-500/50 hover:shadow-lg hover:shadow-purple-900/20 aspect-[4/5] md:aspect-[3/4]">
+                                    <div className="flex-grow flex items-center justify-center">
+                                        <span className="text-5xl sm:text-6xl transform group-hover:scale-110 transition-transform duration-300 icon-glow-saffron">{cat.icon}</span>
+                                    </div>
+                                    <div className="mt-4 text-center">
+                                        <span className="block text-xs sm:text-sm font-bold text-white tracking-wider mb-1 uppercase">{cat.titleEn}</span>
+                                        <span className="block text-[10px] sm:text-xs text-gray-400 font-hindi">{cat.titleHi}</span>
+                                    </div>
                                 </div>
-                            )}
-                            {isLocked && (
-                                <div className="absolute inset-0 bg-black/60 rounded-2xl flex items-center justify-center z-20">
-                                    <span className="text-3xl" role="img" aria-label="Locked">🔒</span>
-                                </div>
-                            )}
-                            <div className={`w-full aspect-square rounded-xl overflow-hidden shadow-md bg-gradient-radial from-purple-800 via-slate-900 to-black flex items-center justify-center ${isLocked ? 'grayscale' : ''}`}>
-                            <span
-                                    className={`text-4xl sm:text-5xl text-white transition-transform duration-300 ${isLocked ? '' : 'group-hover:scale-125'}`}
-                            >
-                                {option.icon}
-                            </span>
-                            </div>
-                            <div className={`text-center leading-tight h-12 flex flex-col items-center justify-center p-1 ${isLocked ? 'text-gray-400' : 'text-white'}`}>
-                                <span className="font-sans font-semibold text-white text-[11px] sm:text-xs leading-tight">{toolName.en}</span>
-                                <span className="font-hindi text-purple-200/90 text-[11px] sm:text-xs leading-tight">{toolName.hi}</span>
-                            </div>
-                        </button>
-                        );
-                    })}
+                            </Link>
+                        )
+                    ))}
                 </div>
-            </section>
+            </div>
 
-            <div className="space-y-12 mt-12">
+            {/* Trending Video Collection Section */}
+            <TrendingVideoCollection products={products} />
+
+            <div className="space-y-12 mb-12">
                 {/* 1. E-books (Priority) */}
-                <ProductShowcaseSlider
-                    title={tDiv(DivinationType.TANTRA_MANTRA_YANTRA_EBOOK).hi}
-                    products={ebookProducts}
-                    viewAllLink="/store/ebooks"
-                />
+                {isVisible('product_ebooks') && (
+                    <ProductShowcaseSlider
+                        title={tDiv(DivinationType.TANTRA_MANTRA_YANTRA_EBOOK).hi}
+                        products={ebookProducts}
+                        viewAllLink="/store/ebooks"
+                    />
+                )}
 
-                {/* 2. Pujan Samagri */}
-                <ProductShowcaseSlider
-                    title={tDiv(DivinationType.PUJAN_SAMAGRI).hi}
-                    products={pujanProducts}
-                    viewAllLink="/store/pujan-samagri"
-                />
+                {/* 2. Mobile Accessories (Moved here as requested) */}
+                {isVisible('product_mobile') && (
+                    <ProductShowcaseSlider
+                        title={tDiv(DivinationType.MOBILE_ACCESSORIES).hi}
+                        products={mobileProducts}
+                        viewAllLink="/store/mobile-accessories"
+                    />
+                )}
 
-                {/* 3. Gems & Jewelry */}
-                <ProductShowcaseSlider
-                    title={tDiv(DivinationType.GEMS_JEWELRY).hi}
-                    products={gemsProducts}
-                    viewAllLink="/store/gems-jewelry"
-                />
+                {/* 3. Pujan Samagri */}
+                {isVisible('product_pujan') && (
+                    <ProductShowcaseSlider
+                        title={tDiv(DivinationType.PUJAN_SAMAGRI).hi}
+                        products={pujanProducts}
+                        viewAllLink="/store/pujan-samagri"
+                    />
+                )}
 
-                {/* 4. Mobile Accessories */}
-                <ProductShowcaseSlider
-                    title={tDiv(DivinationType.MOBILE_ACCESSORIES).hi}
-                    products={mobileProducts}
-                    viewAllLink="/store/mobile-accessories"
-                />
+                {/* 4. Gems & Jewelry */}
+                {isVisible('product_gems') && (
+                    <ProductShowcaseSlider
+                        title={tDiv(DivinationType.GEMS_JEWELRY).hi}
+                        products={gemsProducts}
+                        viewAllLink="/store/gems-jewelry"
+                    />
+                )}
 
                 {/* 5. Shoes */}
-                <ProductShowcaseSlider
-                    title={tDiv(DivinationType.LADIES_GENTS_BABY_SHOES).hi}
-                    products={shoesProducts}
-                    viewAllLink="/store/shoes"
-                />
+                {isVisible('product_shoes') && (
+                    <ProductShowcaseSlider
+                        title={tDiv(DivinationType.LADIES_GENTS_BABY_SHOES).hi}
+                        products={shoesProducts}
+                        viewAllLink="/store/shoes"
+                    />
+                )}
 
                 {/* 6. Accessories */}
-                <ProductShowcaseSlider
-                    title={tDiv(DivinationType.LADIES_GENTS_ACCESSORIES).hi}
-                    products={accessoriesProducts}
-                    viewAllLink="/store/accessories"
-                />
+                {isVisible('product_accessories') && (
+                    <ProductShowcaseSlider
+                        title={tDiv(DivinationType.LADIES_GENTS_ACCESSORIES).hi}
+                        products={accessoriesProducts}
+                        viewAllLink="/store/accessories"
+                    />
+                )}
             </div>
         </div>
     );
