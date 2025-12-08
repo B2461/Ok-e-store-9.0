@@ -20,11 +20,40 @@ const fileToBase64 = (file: File): Promise<string> => {
     });
 };
 
+// SVG Icons for Payment Apps
+const GPayIcon = () => (
+    <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center p-1 shadow-md">
+        <svg viewBox="0 0 24 24" className="w-full h-full">
+            <path fill="#4285F4" d="M12 24c6.6 0 12-5.4 12-12S18.6 0 12 0 0 5.4 0 12s5.4 12 12 12z" />
+            <path fill="#FFF" d="M12 10.5c.8 0 1.5.3 2.1.8l1.6-1.6c-1-1-2.4-1.6-3.7-1.6-2.9 0-5.3 2-6.2 4.7l2.9 2.2c.7-2 2.6-3.5 4.9-3.5" />
+            <path fill="#FFF" d="M12 13.5c-1.3 0-2.4-.4-3.3-1.1l-2.9 2.2c1.6 2.3 4.3 3.9 7.4 3.9 2.7 0 5.1-1.1 6.8-2.9l-2.6-2.4c-.9.9-2.2 1.4-4.2 1.4" />
+            <path fill="#FFF" d="M22 12c0-.7-.1-1.3-.2-2H12v4h5.6c-.3 1.3-1 2.4-2.1 3.1l2.6 2.4C20.5 17.6 22 15 22 12" />
+        </svg>
+    </div>
+);
+
+const PhonePeIcon = () => (
+    <div className="w-12 h-12 rounded-xl overflow-hidden shadow-md bg-[#5F259F] flex items-center justify-center">
+        <span className="text-white font-bold text-xs">Pe</span>
+    </div>
+);
+
+const PaytmIcon = () => (
+    <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center overflow-hidden border border-blue-200 shadow-md">
+        <span className="text-[#00baf2] font-bold text-[10px]">Paytm</span>
+    </div>
+);
+
+const BhimIcon = () => (
+    <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center text-white font-bold text-[10px] shadow-md">
+        BHIM
+    </div>
+);
+
 const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ cartItems, onPlaceOrder, onVerificationRequest }) => {
     const navigate = useNavigate();
     const { t, currentUser } = useAppContext();
     
-    // Initialize with currentUser data ensuring email/phone are captured immediately
     const [customer, setCustomer] = useState<CustomerDetails>({
         name: currentUser?.name || '', 
         address: '', 
@@ -32,11 +61,12 @@ const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ cartItems, onPlaceOrder
         state: '', 
         pincode: '', 
         phone: currentUser?.phone || '', 
-        email: currentUser?.email || '', // Critical fix: Auto-fill email from profile
+        email: currentUser?.email || '',
         whatsapp: ''
     });
     
-    const [view, setView] = useState<'details' | 'shipping_payment' | 'payment_form'>('details');
+    // Views: details -> shipping_payment -> payment_selection -> manual_verification
+    const [view, setView] = useState<'details' | 'shipping_payment' | 'payment_selection' | 'manual_verification'>('details');
     const [paymentMethod, setPaymentMethod] = useState<'PREPAID' | 'COD' | null>(null);
     const [formError, setFormError] = useState<string | null>(null);
     const [transactionId, setTransactionId] = useState('');
@@ -44,10 +74,10 @@ const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ cartItems, onPlaceOrder
     const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
     const [isVerifying, setIsVerifying] = useState(false);
     const [orderId] = useState(`order-${Date.now()}`);
+    const [selectedUpiApp, setSelectedUpiApp] = useState<string | null>(null);
     const galleryInputRef = useRef<HTMLInputElement>(null);
     const cameraInputRef = useRef<HTMLInputElement>(null);
 
-    // Ensure customer details stay synced if currentUser loads late
     useEffect(() => {
         if (currentUser) {
             setCustomer(prev => ({
@@ -75,18 +105,33 @@ const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ cartItems, onPlaceOrder
     const shipping = 0;
     const total = totalAmount + shipping;
 
-    const upiQrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=224x224&data=${encodeURIComponent(`upi://pay?pa=9305968628@digikhata&pn=OkFutureZone&am=${total.toFixed(2)}&cu=INR&tn=Order-${orderId.slice(-6)}`)}`;
+    // Updated UPI ID
+    const merchantUpiId = "bp9305968-5@oksbi";
+    const merchantName = "OkFutureZone";
+
+    const upiQrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=224x224&data=${encodeURIComponent(`upi://pay?pa=${merchantUpiId}&pn=${merchantName}&am=${total.toFixed(2)}&cu=INR&tn=Order-${orderId.slice(-6)}`)}`;
     
+    const handleUpiPayment = (appName: string) => {
+        // 1. Construct the intent URL
+        const upiLink = `upi://pay?pa=${merchantUpiId}&pn=${merchantName}&am=${total.toFixed(2)}&cu=INR&tn=Order-${orderId.slice(-6)}`;
+        
+        // 2. Trigger the deep link to open the app
+        window.location.href = upiLink;
+        
+        // 3. Update state to show verification screen immediately
+        // This ensures when they return to the app, they are on the upload screen
+        setSelectedUpiApp(appName);
+        setView('manual_verification');
+    };
+
     const CopyableUpi = ({ upiId }: { upiId: string }) => {
         const [copied, setCopied] = useState(false);
-    
         const handleCopy = () => {
             navigator.clipboard.writeText(upiId).then(() => {
                 setCopied(true);
                 setTimeout(() => setCopied(false), 2000);
             });
         };
-    
         return (
             <div className="flex items-center justify-center">
                 <p className="font-mono text-base text-white bg-black/30 py-1 px-3 rounded-lg">{upiId}</p>
@@ -131,12 +176,11 @@ const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ cartItems, onPlaceOrder
             setView('shipping_payment');
         } else {
             setPaymentMethod('PREPAID');
-            setView('payment_form');
+            setView('payment_selection');
         }
     };
     
     const getFinalCustomerDetails = () => {
-        // Ensure logged-in user's email is attached even if not in form
         return {
             ...customer,
             email: customer.email || currentUser?.email || ''
@@ -148,48 +192,15 @@ const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ cartItems, onPlaceOrder
         if (method === 'COD') {
             const finalCustomer = getFinalCustomerDetails();
             onPlaceOrder(finalCustomer, total, 'COD', orderId);
-
-            // Send order details to admin WhatsApp for COD
+            // ... WhatsApp logic for COD ...
             const adminWhatsAppNumber = '919305968628';
-            const itemsSummaryWa = cartItems.map(item => `- ${item.name} (Cat: ${item.category}, Qty: ${item.quantity}, Color: ${item.selectedColor})`).join('\n');
-
-            let deliveryDetails = '';
-            if (hasPhysicalItems) {
-                deliveryDetails = `
-*Shipping Address:*
-${finalCustomer.address}
-${finalCustomer.city}, ${finalCustomer.state} - ${finalCustomer.pincode}
-    `;
-            }
-            if (hasDigitalItems) {
-                deliveryDetails += `
-*Digital Delivery:*
-Email: ${finalCustomer.email}
-WhatsApp: ${finalCustomer.whatsapp}
-    `;
-            }
-            const message = `
-*📦 New Cash on Delivery Order!*
-
-*Order ID:* ${orderId}
-*Customer Name:* ${finalCustomer.name}
-*Customer Phone:* ${finalCustomer.phone}
-${deliveryDetails.trim()}
-
-*Order Details:*
-${itemsSummaryWa}
-
-*Total Amount:* ₹${total.toFixed(2)}
-*Payment Method:* CASH ON DELIVERY
-
-Please process the order.
-`;
-            const whatsappUrl = `https://wa.me/${adminWhatsAppNumber}?text=${encodeURIComponent(message.trim())}`;
+            const itemsSummaryWa = cartItems.map(item => `- ${item.name}`).join('\n');
+            const message = `*📦 COD Order!* ID: ${orderId}\nName: ${finalCustomer.name}\nTotal: ₹${total}\nItems:\n${itemsSummaryWa}`;
+            const whatsappUrl = `https://wa.me/${adminWhatsAppNumber}?text=${encodeURIComponent(message)}`;
             window.open(whatsappUrl, '_blank');
-            
             navigate(`/orders/${orderId}`);
         } else {
-            setView('payment_form');
+            setView('payment_selection');
         }
     };
 
@@ -221,6 +232,7 @@ Please process the order.
             const screenshotDataUrl = await fileToBase64(screenshot);
             const itemsSummaryText = cartItems.map(item => `${item.name} x${item.quantity}`).join(', ');
 
+            // Send details to Admin Panel
             onVerificationRequest({
                 userName: finalCustomer.name,
                 userPhone: finalCustomer.phone,
@@ -232,45 +244,21 @@ Please process the order.
                 orderId: orderId,
             });
             
+            // Place the order
             onPlaceOrder(finalCustomer, total, 'PREPAID', orderId);
 
-            // Send order details to admin WhatsApp
+            // Send details to Admin WhatsApp
             const adminWhatsAppNumber = '919305968628';
-            const itemsSummaryWa = cartItems.map(item => `- ${item.name} (Cat: ${item.category}, Qty: ${item.quantity}, Color: ${item.selectedColor})`).join('\n');
+            const message = `*🎉 Prepaid Order Verification!*
+ID: ${orderId}
+Name: ${finalCustomer.name}
+Total: ₹${total}
+Txn ID: ${transactionId}
+Items: ${itemsSummaryText}
 
-            let deliveryDetails = '';
-            if (hasPhysicalItems) {
-                deliveryDetails = `
-*Shipping Address:*
-${finalCustomer.address}
-${finalCustomer.city}, ${finalCustomer.state} - ${finalCustomer.pincode}
-    `;
-            }
-            if (hasDigitalItems) {
-                deliveryDetails += `
-*Digital Delivery:*
-Email: ${finalCustomer.email}
-WhatsApp: ${finalCustomer.whatsapp}
-    `;
-            }
-            const message = `
-*🎉 New Prepaid Order Received!*
-
-*Order ID:* ${orderId}
-*Customer Name:* ${finalCustomer.name}
-*Customer Phone:* ${finalCustomer.phone}
-${deliveryDetails.trim()}
-
-*Order Details:*
-${itemsSummaryWa}
-
-*Total Amount:* ₹${total.toFixed(2)}
-*Payment Method:* PREPAID
-*Transaction ID:* ${transactionId}
-
-Please verify the payment and process the order.
-`;
-            const whatsappUrl = `https://wa.me/${adminWhatsAppNumber}?text=${encodeURIComponent(message.trim())}`;
+कृपया एडमिन पैनल में भुगतान सत्यापित करें।`;
+            
+            const whatsappUrl = `https://wa.me/${adminWhatsAppNumber}?text=${encodeURIComponent(message)}`;
             window.open(whatsappUrl, '_blank');
             
             navigate(`/orders/${orderId}`);
@@ -289,9 +277,12 @@ Please verify the payment and process the order.
         if (view === 'shipping_payment') {
             return <button onClick={() => setView('details')} className="absolute top-6 left-6 text-purple-300 hover:text-white transition">&larr; वापस जाएं</button>;
         }
-        if (view === 'payment_form') {
+        if (view === 'payment_selection') {
             const backView = hasPhysicalItems ? 'shipping_payment' : 'details';
             return <button onClick={() => setView(backView)} className="absolute top-6 left-6 text-purple-300 hover:text-white transition">&larr; वापस जाएं</button>;
+        }
+        if (view === 'manual_verification') {
+            return <button onClick={() => setView('payment_selection')} className="absolute top-6 left-6 text-purple-300 hover:text-white transition">&larr; वापस जाएं</button>;
         }
         return null;
     };
@@ -365,7 +356,6 @@ Please verify the payment and process the order.
                  return (
                     <div className="text-center">
                         <h2 className="text-3xl font-hindi font-bold mb-8 text-center">भुगतान विधि</h2>
-                        <p className="text-purple-200 mb-8">कृपया अपनी पसंदीदा भुगतान विधि चुनें।</p>
                         <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
                            <button onClick={() => handleSelectPaymentMethod('PREPAID')} className="p-6 bg-white/5 border-2 border-white/20 rounded-lg hover:bg-purple-500/20 hover:border-purple-400 transition">
                                 <h3 className="text-2xl font-bold text-white mb-2">प्रीपेड भुगतान</h3>
@@ -378,12 +368,71 @@ Please verify the payment and process the order.
                         </div>
                     </div>
                 );
-            case 'payment_form':
+            case 'payment_selection':
                 return (
-                    <div className="text-center">
-                        <h2 className="text-3xl font-hindi font-bold mb-2 text-center">प्रीपेड भुगतान</h2>
-                        <p className="text-6xl font-bold text-white mb-8">₹{total.toFixed(2)}</p>
+                    <div className="text-left animate-fade-in max-w-md mx-auto">
+                        <div className="bg-gray-900 p-4 -mx-4 -mt-4 mb-6 flex justify-between items-center border-b border-gray-800 rounded-t-xl">
+                            <span className="text-gray-400 font-semibold tracking-wide">TOTAL AMOUNT</span>
+                            <span className="text-white font-bold text-xl">₹{total.toFixed(0)}</span>
+                        </div>
+
+                        <h3 className="text-white font-bold text-lg mb-4 uppercase tracking-widest pl-1">UPI</h3>
+
+                        {/* Pay by Any UPI App Section */}
+                        <div className="bg-gray-800 border border-gray-700 rounded-2xl p-5 mb-6 relative overflow-hidden group shadow-lg">
+                            <div className="flex justify-between items-center mb-5">
+                                <div>
+                                    <h4 className="text-white font-bold text-base">PAY BY ANY UPI APP</h4>
+                                    <p className="text-gray-400 text-xs mt-1">CLICK ICON TO PAY & UPLOAD SCREENSHOT</p>
+                                </div>
+                                <div className="w-5 h-5 rounded-full border-2 border-gray-500 group-hover:border-purple-500 flex items-center justify-center">
+                                    <div className="w-2.5 h-2.5 rounded-full bg-purple-500"></div>
+                                </div>
+                            </div>
+
+                            {/* Icons Row */}
+                            <div className="flex gap-6 mt-2 overflow-x-auto pb-2">
+                                <button onClick={() => handleUpiPayment('GPay')} className="flex flex-col items-center gap-2 group min-w-[50px] transition-transform hover:scale-105">
+                                    <GPayIcon />
+                                    <span className="text-[10px] text-gray-400 font-medium group-hover:text-white">GPAY</span>
+                                </button>
+                                <button onClick={() => handleUpiPayment('PhonePe')} className="flex flex-col items-center gap-2 group min-w-[50px] transition-transform hover:scale-105">
+                                    <PhonePeIcon />
+                                    <span className="text-[10px] text-gray-400 font-medium group-hover:text-white">PHONEPE</span>
+                                </button>
+                                <button onClick={() => handleUpiPayment('Paytm')} className="flex flex-col items-center gap-2 group min-w-[50px] transition-transform hover:scale-105">
+                                    <PaytmIcon />
+                                    <span className="text-[10px] text-gray-400 font-medium group-hover:text-white">PAYTM</span>
+                                </button>
+                                <button onClick={() => handleUpiPayment('BHIM')} className="flex flex-col items-center gap-2 group min-w-[50px] transition-transform hover:scale-105">
+                                    <BhimIcon />
+                                    <span className="text-[10px] text-gray-400 font-medium group-hover:text-white">BHIM</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Other Options Button */}
+                        <button 
+                            onClick={() => { setSelectedUpiApp(null); setView('manual_verification'); }}
+                            className="w-full bg-gray-800 border border-gray-700 text-white font-semibold py-4 rounded-xl hover:bg-gray-700 transition-all mb-6 text-sm tracking-wide shadow-md uppercase"
+                        >
+                            OTHER UPI OPTIONS / SCAN QR
+                        </button>
+                    </div>
+                );
+            case 'manual_verification':
+                return (
+                    <div className="text-center animate-fade-in">
+                        <h2 className="text-3xl font-hindi font-bold mb-6 text-center">मैनुअल सत्यापन</h2>
                         
+                        {selectedUpiApp && (
+                            <div className="bg-green-900/40 p-4 rounded-lg border border-green-500/30 mb-6">
+                                <p className="text-green-200 text-sm">
+                                    आपने <strong>{selectedUpiApp}</strong> चुना है। यदि ऐप नहीं खुला, तो नीचे दिए गए QR को स्कैन करें। भुगतान के बाद, पुष्टि के लिए विवरण भरें।
+                                </p>
+                            </div>
+                        )}
+
                         {isVerifying ? (
                             <div className="text-center p-8">
                                 <div className="relative w-16 h-16 mx-auto mb-4">
@@ -394,29 +443,18 @@ Please verify the payment and process the order.
                             </div>
                         ) : (
                             <>
-                                <p className="text-purple-200 mb-6 max-w-lg mx-auto">भुगतान करने के लिए कृपया नीचे दिए गए QR कोड को स्कैन करें या UPI आईडी/नंबर का उपयोग करें।</p>
-                                
                                 <div className="max-w-md mx-auto mb-8">
                                     <div className="bg-white/5 p-6 rounded-2xl border border-white/20 flex flex-col items-center text-center">
-                                        <h3 className="font-bold text-xl text-white mb-4">DigiKhata / Paytm</h3>
                                         <div className="bg-white p-2 rounded-lg shadow-lg">
-                                            <img src={upiQrCodeUrl} alt="DigiKhata / Paytm QR Code" className="w-56 h-56 object-contain"/>
+                                            <img src={upiQrCodeUrl} alt="UPI QR Code" className="w-56 h-56 object-contain"/>
                                         </div>
-                                        <div className="mt-4">
-                                            <p className="text-purple-300 text-sm">या DigiKhata UPI आईडी पर:</p>
-                                            <div className="mt-1">
-                                                    <CopyableUpi upiId="9305968628@digikhata" />
-                                            </div>
-                                        </div>
-                                        <div className="mt-4">
-                                            <p className="text-purple-300 text-sm">या Paytm नंबर पर:</p>
-                                            <div className="mt-1">
-                                                    <CopyableUpi upiId="9305968628" />
-                                            </div>
+                                        <div className="mt-4 w-full">
+                                            <p className="text-purple-300 text-sm mb-2">UPI ID:</p>
+                                            <CopyableUpi upiId={merchantUpiId} />
                                         </div>
                                     </div>
                                 </div>
-
+                                
                                 <p className="text-purple-200 mt-6 mb-8 max-w-md mx-auto">{t('payment_after_instruction')}</p>
 
                                 <form onSubmit={handleSubmitForVerification} className="w-full max-w-md mx-auto space-y-4">
@@ -437,7 +475,7 @@ Please verify the payment and process the order.
                                     {screenshotPreview && <img src={screenshotPreview} alt="Screenshot Preview" className="mx-auto max-h-40 rounded-lg mt-2" />}
                                     {formError && <p className="text-red-400">{formError}</p>}
                                     <button type="submit" className="w-full px-10 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-full shadow-lg hover:shadow-xl hover:scale-105 transform transition-all duration-300 ease-in-out text-lg">
-                                        मैंने भुगतान कर दिया है, ऑर्डर पूरा करें
+                                        सत्यापन के लिए भेजें
                                     </button>
                                 </form>
                             </>

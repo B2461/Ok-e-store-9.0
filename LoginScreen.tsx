@@ -20,36 +20,62 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onClose, onLogin, onSignup })
     const handleLoginSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setError('');
-        if (!email || !password) {
+        
+        const cleanEmail = email.trim();
+        
+        if (!cleanEmail || !password) {
             setError('कृपया ईमेल और पासवर्ड दोनों दर्ज करें।');
             return;
         }
+        
+        // Basic Email Validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(cleanEmail)) {
+             setError('कृपया एक मान्य ईमेल पता दर्ज करें।');
+             return;
+        }
+
         setIsLoading(true);
-        const success = await onLogin(email, password);
+        const success = await onLogin(cleanEmail, password);
         setIsLoading(false);
         if (!success) {
-            setError('अमान्य ईमेल या पासवर्ड (या खाता नहीं मिला)।');
+            setError('लॉगिन विफल। कृपया ईमेल और पासवर्ड की जांच करें।');
         }
     };
 
     const handleSignupSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setError('');
-        if (!name || !email || !password || !phone) {
+        
+        const cleanEmail = email.trim();
+        const cleanName = name.trim();
+        const cleanPhone = phone.trim().replace(/\D/g, ''); // Remove non-digits
+
+        if (!cleanName || !cleanEmail || !password || !cleanPhone) {
             setError('कृपया सभी फ़ील्ड भरें।');
             return;
         }
+        
         if (password !== confirmPassword) {
             setError('पासवर्ड मेल नहीं खाते।');
             return;
         }
+        
+        // Email Validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(cleanEmail)) {
+             setError('कृपया एक मान्य ईमेल पता दर्ज करें।');
+             return;
+        }
+
         const phoneRegex = /^\d{10}$/;
-        if (!phoneRegex.test(phone)) {
+        if (!phoneRegex.test(cleanPhone)) {
             setError('कृपया एक मान्य 10-अंकीय फ़ोन नंबर दर्ज करें।');
             return;
         }
+        
         setIsLoading(true);
-        const success = await onSignup({ name, email, password, phone });
+        const success = await onSignup({ name: cleanName, email: cleanEmail, password, phone: cleanPhone });
         setIsLoading(false);
         if (!success) {
             setError('साइन अप विफल रहा (शायद ईमेल पहले से उपयोग में है)।');
@@ -73,7 +99,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onClose, onLogin, onSignup })
             <h2 className="text-2xl font-hindi font-bold text-white mb-4 text-center">नया खाता बनाएं</h2>
             <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="पूरा नाम" required className="w-full bg-white/10 p-3 rounded-lg border border-white/20"/>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ईमेल" required className="w-full bg-white/10 p-3 rounded-lg border border-white/20"/>
-            <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))} maxLength={10} placeholder="10-अंकीय फ़ोन नंबर" required className="w-full bg-white/10 p-3 rounded-lg border border-white/20"/>
+            <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={10} placeholder="10-अंकीय फ़ोन नंबर" required className="w-full bg-white/10 p-3 rounded-lg border border-white/20"/>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="पासवर्ड" required className="w-full bg-white/10 p-3 rounded-lg border border-white/20"/>
             <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="पासवर्ड की पुष्टि करें" required className="w-full bg-white/10 p-3 rounded-lg border border-white/20"/>
             {error && <p className="text-red-400 text-center">{error}</p>}

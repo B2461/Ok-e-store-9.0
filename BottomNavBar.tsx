@@ -57,6 +57,9 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ cartItemCount }) => {
         },
     ];
 
+    const activeIconClass = "bg-yellow-400 text-black rounded-lg shadow-[0_0_15px_rgba(250,204,21,0.6)] transform scale-105 transition-all duration-300";
+    const inactiveIconClass = "text-white/70 hover:text-white transition-colors duration-300";
+
     return (
         <nav className="fixed bottom-4 left-0 right-0 max-w-md mx-auto bg-gradient-to-r from-purple-900 via-black to-orange-900 backdrop-blur-md rounded-2xl shadow-[0_0_20px_rgba(249,115,22,0.5)] border border-orange-700/50 z-40">
             <div className="flex justify-around items-center h-14">
@@ -69,12 +72,12 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ cartItemCount }) => {
                         return location.pathname.startsWith(path);
                     })();
 
-                    const className = `relative flex flex-col items-center justify-center gap-1 w-16 h-full transition-colors duration-200 ${isActive ? 'text-white' : 'text-white/70 hover:text-white'}`;
+                    const className = `relative flex flex-col items-center justify-center gap-1 w-16 h-full p-1 ${isActive ? activeIconClass : inactiveIconClass}`;
 
                     const content = (
                         <>
                             {path === '/profile' && isAuthenticated && currentUser?.profilePicture ? (
-                                <div className={`w-6 h-6 rounded-full border border-white/30 overflow-hidden ${isActive ? 'ring-2 ring-white' : ''}`}>
+                                <div className={`w-6 h-6 rounded-full border border-current overflow-hidden`}>
                                     <img src={currentUser.profilePicture} alt="Profile" className="w-full h-full object-cover" />
                                 </div>
                             ) : (
