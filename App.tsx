@@ -1,33 +1,34 @@
 import React, { useState, useCallback, useEffect, useRef, createContext, useContext, useMemo } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { DivinationType, CartItem, Order, CustomerDetails, Product, Notification, UserProfile, VerificationRequest, SupportTicket, SocialMediaPost, SubscriptionPlan } from '../types';
-import WelcomeScreen from './WelcomeScreen';
-import SelectionScreen from './SelectionScreen';
-import SettingsScreen from './SettingsScreen';
-import PujanSamagriStore from './PujanSamagriStore';
-import ProductDetailScreen from './ProductDetailScreen';
-import ShoppingCartScreen from './ShoppingCartScreen';
-import CheckoutScreen from './CheckoutScreen';
-import OrderConfirmationScreen from './OrderConfirmationScreen';
-import { products as initialProducts } from '../data/products';
-import { ebooks } from '../data/ebooks';
-import NotificationBell from './NotificationBell';
-import AdminScreen from './AdminScreen';
-import TermsAndConditions from './TermsAndConditions';
-import PrivacyPolicy from './PrivacyPolicy';
-import { toolCategories } from '../data/tools';
-import ProfileScreen from './ProfileScreen';
-import BottomNavBar from './BottomNavBar';
-import LoginScreen from './LoginScreen';
-import OrderHistoryScreen from './OrderHistoryScreen';
-import SupportTicketScreen from './SupportTicketScreen';
-import AudioPlayer from './AudioPlayer';
-import SearchModal from './SearchModal';
-import LocalMarketingScreen from './LocalMarketingScreen';
-import PremiumScreen from './PremiumScreen';
-import SubscriptionPaymentScreen from './SubscriptionPaymentScreen';
-import SubscriptionConfirmationScreen from './SubscriptionConfirmationScreen';
-import { subscribeToAuthChanges, loginUser, registerUser, logoutUser } from '../services/firebaseService';
+import WelcomeScreen from './components/WelcomeScreen';
+import SelectionScreen from './components/SelectionScreen';
+import SettingsScreen from './components/SettingsScreen';
+import PujanSamagriStore from './components/PujanSamagriStore';
+import ProductDetailScreen from './components/ProductDetailScreen';
+import ShoppingCartScreen from './components/ShoppingCartScreen';
+import CheckoutScreen from './components/CheckoutScreen';
+import OrderConfirmationScreen from './components/OrderConfirmationScreen';
+import { products as initialProducts } from './data/products';
+import { ebooks } from './data/ebooks';
+import NotificationBell from './components/NotificationBell';
+import AdminScreen from './components/AdminScreen';
+import TermsAndConditions from './components/TermsAndConditions';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import { toolCategories } from './data/tools';
+import ProfileScreen from './components/ProfileScreen';
+import BottomNavBar from './components/BottomNavBar';
+import LoginScreen from './components/LoginScreen';
+import OrderHistoryScreen from './components/OrderHistoryScreen';
+import SupportTicketScreen from './components/SupportTicketScreen';
+import AudioPlayer from './components/AudioPlayer';
+import SearchModal from './components/SearchModal';
+import LocalMarketingScreen from './components/LocalMarketingScreen';
+import PremiumScreen from './components/PremiumScreen';
+import SubscriptionPaymentScreen from './components/SubscriptionPaymentScreen';
+import SubscriptionConfirmationScreen from './components/SubscriptionConfirmationScreen';
+import WishlistScreen from './components/WishlistScreen';
+import { subscribeToAuthChanges, loginUser, registerUser, logoutUser } from './services/firebaseService';
 
 // --- I18n Language & Auth System ---
 const translations = {
@@ -50,6 +51,7 @@ const translations = {
     cart: 'कार्ट',
     search: 'खोज',
     login: 'लॉगिन',
+    wishlist: 'पसंद',
     // Welcome Screen
     welcome_greeting: 'Ok-E-store में आपका स्वागत है',
     welcome_subtitle: 'आध्यात्मिक और आधुनिक जीवनशैली की खरीदारी करें',
@@ -127,6 +129,7 @@ const translations = {
     cart: 'Cart',
     search: 'Search',
     login: 'Login',
+    wishlist: 'Wishlist',
     // Welcome Screen
     welcome_greeting: 'Welcome to Ok-E-store',
     welcome_subtitle: 'Shop for spiritual and modern lifestyle products',
@@ -215,6 +218,8 @@ interface AppContextType {
     logout: () => void;
     deleteCurrentUser: () => void;
     updateProfile: (profile: UserProfile) => void;
+    wishlist: string[];
+    toggleWishlist: (productId: string) => void;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -244,6 +249,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const [supportTickets, setSupportTickets] = useState<SupportTicket[]>(() => {
         try { const saved = localStorage.getItem('okFutureZoneSupportTickets'); return saved ? JSON.parse(saved) : []; } catch { return []; }
     });
+    
+    // Wishlist State
+    const [wishlist, setWishlist] = useState<string[]>(() => {
+        try { const saved = localStorage.getItem('okFutureZoneWishlist'); return saved ? JSON.parse(saved) : []; } catch { return []; }
+    });
+
     const [isAuthVisible, setIsAuthVisible] = useState(false);
     const [authSuccessCallback, setAuthSuccessCallback] = useState<(() => void) | null>(null);
 
@@ -285,6 +296,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     useEffect(() => { localStorage.setItem('okFutureZoneExtendedProfiles', JSON.stringify(extendedProfiles)); }, [extendedProfiles]);
     useEffect(() => { localStorage.setItem('okFutureZoneOrders', JSON.stringify(orders)); }, [orders]);
     useEffect(() => { localStorage.setItem('okFutureZoneSupportTickets', JSON.stringify(supportTickets)); }, [supportTickets]);
+    useEffect(() => { localStorage.setItem('okFutureZoneWishlist', JSON.stringify(wishlist)); }, [wishlist]);
 
     const t = useCallback((key: string, options?: Record<string, string | number>): string => {
         let translation = translations[language][key as keyof typeof translations.hi] || key;
@@ -363,11 +375,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             // Ideally also delete user from Firebase, but requires re-auth usually.
         }
     };
+
+    const toggleWishlist = (productId: string) => {
+        setWishlist(prev => {
+            if (prev.includes(productId)) {
+                return prev.filter(id => id !== productId);
+            } else {
+                return [...prev, productId];
+            }
+        });
+    };
     
     const value: AppContextType = useMemo(() => ({
         language, setLanguage, theme, setTheme, t, tDiv, isAuthenticated, currentUser, showAuth, logout, deleteCurrentUser, updateProfile, 
-        handleLogin: handleLoginLogic, handleSignup: handleSignupLogic
-    }), [language, theme, isAuthenticated, currentUser, t, tDiv]);
+        handleLogin: handleLoginLogic, handleSignup: handleSignupLogic,
+        wishlist, toggleWishlist
+    }), [language, theme, isAuthenticated, currentUser, t, tDiv, wishlist]);
 
     const contextWithSetters = { ...value, setOrders, setSupportTickets };
 
@@ -386,7 +409,7 @@ const CartIcon: React.FC<{ isActive: boolean }> = ({ isActive }) => (
 );
 
 const OrderIcon: React.FC<{ isActive: boolean }> = ({ isActive }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 transition-colors ${isActive ? 'text-yellow-300' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={isActive ? 2.5 : 2}>
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={isActive ? 2.5 : 2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
     </svg>
 );
@@ -397,10 +420,16 @@ const SearchIcon: React.FC<{ isActive: boolean }> = ({ isActive }) => (
     </svg>
 );
 
+const HeartIcon: React.FC<{ isActive: boolean }> = ({ isActive }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={isActive ? 2.5 : 2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+    </svg>
+);
+
 const App: React.FC = () => {
     const appContext = useContext(AppContext);
     if (!appContext) return null;
-    const { currentUser, t, updateProfile, isAuthenticated, showAuth } = appContext;
+    const { currentUser, t, updateProfile, isAuthenticated, showAuth, wishlist } = appContext;
     const { setOrders, setSupportTickets } = appContext as any;
     
     const navigate = useNavigate();
@@ -422,6 +451,7 @@ const App: React.FC = () => {
     const [isSearchVisible, setIsSearchVisible] = useState(false);
     const audioRef = useRef<HTMLAudioElement>(null);
     const [selectedSubscriptionPlan, setSelectedSubscriptionPlan] = useState<(SubscriptionPlan & { autoRenew: boolean }) | null>(null);
+    const [isNotifOpen, setIsNotifOpen] = useState(false);
 
     // Green Flash Logic States
     const [flashCart, setFlashCart] = useState(false);
@@ -613,6 +643,10 @@ const App: React.FC = () => {
         navigate('/subscribe');
     };
 
+    // --- Styling for Yellow Box Effect ---
+    const activeIconClass = "bg-yellow-400 text-black rounded-lg shadow-[0_0_15px_rgba(250,204,21,0.6)] transform scale-105 transition-all duration-300";
+    const inactiveIconClass = "hover:bg-white/10 text-white transition-colors duration-300";
+
     return (
         <div className="min-h-screen text-white p-4 pt-20 pb-32">
             {isSearchVisible && <SearchModal products={products} onClose={() => setIsSearchVisible(false)} />}
@@ -627,19 +661,49 @@ const App: React.FC = () => {
                     </Link>
                 </div>
                 <div className="flex items-center gap-1">
-                    <button onClick={() => setIsSearchVisible(true)} className="flex flex-col items-center justify-center w-14 py-1 rounded-lg transition-colors duration-300 hover:bg-white/10">
-                        <SearchIcon isActive={false} />
-                        <span className="text-xs text-center font-medium mt-1 text-white">{t('search')}</span>
+                    <button 
+                        onClick={() => setIsSearchVisible(true)} 
+                        className={`flex flex-col items-center justify-center w-14 py-1 rounded-lg ${isSearchVisible ? activeIconClass : inactiveIconClass}`}
+                    >
+                        <SearchIcon isActive={isSearchVisible} />
+                        <span className="text-xs text-center font-medium mt-1">{t('search')}</span>
                     </button>
-                    <button onClick={() => { setFlashOrder(false); handleProtectedLink('/orders'); }} className={`flex flex-col items-center justify-center w-14 py-1 rounded-lg transition-colors duration-300 ${location.pathname.startsWith('/orders') ? 'yellow-pulse-highlight' : 'hover:bg-white/10'} ${flashOrder ? 'animate-flash-green' : ''}`}>
-                        <OrderIcon isActive={location.pathname.startsWith('/orders') ? true : false} />
-                        <span className={`text-xs text-center font-medium mt-1 ${location.pathname.startsWith('/orders') ? 'text-yellow-300' : 'text-white'}`}>{t('my_orders')}</span>
-                    </button>
-                    <div className={`flex flex-col items-center justify-center w-14 py-1 text-center rounded-lg hover:bg-white/10 ${flashNotif ? 'animate-flash-green' : ''}`}>
-                        <NotificationBell notifications={notifications} onOpen={() => { setFlashNotif(false); setNotifications(prev => prev.map(n => ({ ...n, read: true }))); }} onClear={() => setNotifications([])} />
-                        <span className="text-xs font-medium text-white mt-1">{t('notifications')}</span>
+                    <Link 
+                        to="/wishlist" 
+                        className={`flex flex-col items-center justify-center w-14 py-1 rounded-lg ${location.pathname.startsWith('/wishlist') ? activeIconClass : inactiveIconClass}`}
+                    >
+                        <div className="relative">
+                            <HeartIcon isActive={location.pathname.startsWith('/wishlist')} />
+                            {wishlist.length > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center border border-black">
+                                    {wishlist.length}
+                                </span>
+                            )}
+                        </div>
+                        <span className="text-xs text-center font-medium mt-1">{t('wishlist')}</span>
+                    </Link>
+                    <div className={`flex flex-col items-center justify-center w-14 py-1 text-center rounded-lg ${isNotifOpen ? activeIconClass : inactiveIconClass} ${flashNotif ? 'animate-flash-green' : ''}`}>
+                        <NotificationBell 
+                            notifications={notifications} 
+                            onOpen={() => { setFlashNotif(false); setNotifications(prev => prev.map(n => ({ ...n, read: true }))); }} 
+                            onClear={() => setNotifications([])} 
+                            isOpen={isNotifOpen}
+                            onToggle={setIsNotifOpen}
+                        />
+                        <span className="text-xs font-medium mt-1">{t('notifications')}</span>
                     </div>
-                    <Link to="/cart" onClick={() => setFlashCart(false)} className={`flex flex-col items-center justify-center w-14 py-1 rounded-lg hover:bg-white/10 transition-colors duration-300 ${location.pathname.startsWith('/cart') ? 'bg-white/10' : ''} ${flashCart ? 'animate-flash-green' : ''}`}>
+                    <button 
+                        onClick={() => { setFlashOrder(false); handleProtectedLink('/orders'); }} 
+                        className={`flex flex-col items-center justify-center w-14 py-1 rounded-lg ${location.pathname.startsWith('/orders') ? activeIconClass : inactiveIconClass} ${flashOrder ? 'animate-flash-green' : ''}`}
+                    >
+                        <OrderIcon isActive={location.pathname.startsWith('/orders')} />
+                        <span className="text-xs text-center font-medium mt-1">{t('my_orders')}</span>
+                    </button>
+                    <Link 
+                        to="/cart" 
+                        onClick={() => setFlashCart(false)} 
+                        className={`flex flex-col items-center justify-center w-14 py-1 rounded-lg ${location.pathname.startsWith('/cart') ? activeIconClass : inactiveIconClass} ${flashCart ? 'animate-flash-green' : ''}`}
+                    >
                         <div className="relative">
                             <CartIcon isActive={location.pathname.startsWith('/cart')} />
                             {cartItems.length > 0 && (
@@ -648,7 +712,7 @@ const App: React.FC = () => {
                                 </span>
                             )}
                         </div>
-                        <span className="text-xs font-medium mt-1 text-white">{t('cart')}</span>
+                        <span className="text-xs font-medium mt-1">{t('cart')}</span>
                     </Link>
                 </div>
             </header>
@@ -673,6 +737,7 @@ const App: React.FC = () => {
                     <Route path="/premium" element={<PremiumScreen onSelectPlan={handleSelectPlan} isTrialAvailable={true} onBack={() => navigate('/home')} />} />
                     <Route path="/subscribe" element={<SubscriptionPaymentScreen plan={selectedSubscriptionPlan} userProfile={currentUser} onVerificationRequest={(req) => { onVerificationRequest(req); navigate('/subscription-confirmed'); }} onBack={() => navigate('/premium')} />} />
                     <Route path="/subscription-confirmed" element={<SubscriptionConfirmationScreen expiryDate={null} />} />
+                    <Route path="/wishlist" element={<WishlistScreen products={products} />} />
                 </Routes>
             </div>
 
@@ -681,6 +746,13 @@ const App: React.FC = () => {
             <BottomNavBar cartItemCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)} />
 
             <footer className="text-center text-xs text-orange-400/60 mt-12 pb-4">
+                <div className="flex justify-center mb-4">
+                    <img 
+                        src="https://res.cloudinary.com/de2eehtiy/image/upload/v1765084945/3cc7bb1a-d113-4add-b199-0cb4a8406248_qlnfld.png" 
+                        alt="Ok-E-store Banner" 
+                        className="w-full max-w-sm rounded-lg shadow-lg border border-orange-500/30" 
+                    />
+                </div>
                 <div className="flex justify-center items-center gap-4 mb-2">
                     <Link to="/terms" className="hover:text-orange-300 transition underline">{t('terms_and_conditions')}</Link>
                     <span className="text-orange-400/40">|</span>
