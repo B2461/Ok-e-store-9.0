@@ -1,35 +1,34 @@
-
 import React, { useState, useCallback, useEffect, useRef, createContext, useContext, useMemo } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { DivinationType, CartItem, Order, CustomerDetails, Product, Notification, UserProfile, VerificationRequest, SupportTicket, SocialMediaPost, SubscriptionPlan } from '../types';
-import WelcomeScreen from './WelcomeScreen';
-import SelectionScreen from './SelectionScreen';
-import SettingsScreen from './SettingsScreen';
-import PujanSamagriStore from './PujanSamagriStore';
-import ProductDetailScreen from './ProductDetailScreen';
-import ShoppingCartScreen from './ShoppingCartScreen';
-import CheckoutScreen from './CheckoutScreen';
-import OrderConfirmationScreen from './OrderConfirmationScreen';
-import { products as initialProducts } from '../data/products';
-import { ebooks } from '../data/ebooks';
-import NotificationBell from './NotificationBell';
-import AdminScreen from './AdminScreen';
-import TermsAndConditions from './TermsAndConditions';
-import PrivacyPolicy from './PrivacyPolicy';
-import { toolCategories } from '../data/tools';
-import ProfileScreen from './ProfileScreen';
-import BottomNavBar from './BottomNavBar';
-import LoginScreen from './LoginScreen';
-import OrderHistoryScreen from './OrderHistoryScreen';
-import SupportTicketScreen from './SupportTicketScreen';
-import AudioPlayer from './AudioPlayer';
-import SearchModal from './SearchModal';
-import LocalMarketingScreen from './LocalMarketingScreen';
-import PremiumScreen from './PremiumScreen';
-import SubscriptionPaymentScreen from './SubscriptionPaymentScreen';
-import SubscriptionConfirmationScreen from './SubscriptionConfirmationScreen';
-import WishlistScreen from './WishlistScreen';
-import { subscribeToAuthChanges, loginUser, registerUser, logoutUser } from '../services/firebaseService';
+import WelcomeScreen from './components/WelcomeScreen';
+import SelectionScreen from './components/SelectionScreen';
+import SettingsScreen from './components/SettingsScreen';
+import PujanSamagriStore from './components/PujanSamagriStore';
+import ProductDetailScreen from './components/ProductDetailScreen';
+import ShoppingCartScreen from './components/ShoppingCartScreen';
+import CheckoutScreen from './components/CheckoutScreen';
+import OrderConfirmationScreen from './components/OrderConfirmationScreen';
+import { products as initialProducts } from './data/products';
+import { ebooks } from './data/ebooks';
+import NotificationBell from './components/NotificationBell';
+import AdminScreen from './components/AdminScreen';
+import TermsAndConditions from './components/TermsAndConditions';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import { toolCategories } from './data/tools';
+import ProfileScreen from './components/ProfileScreen';
+import BottomNavBar from './components/BottomNavBar';
+import LoginScreen from './components/LoginScreen';
+import OrderHistoryScreen from './components/OrderHistoryScreen';
+import SupportTicketScreen from './components/SupportTicketScreen';
+import AudioPlayer from './components/AudioPlayer';
+import SearchModal from './components/SearchModal';
+import LocalMarketingScreen from './components/LocalMarketingScreen';
+import PremiumScreen from './components/PremiumScreen';
+import SubscriptionPaymentScreen from './components/SubscriptionPaymentScreen';
+import SubscriptionConfirmationScreen from './components/SubscriptionConfirmationScreen';
+import WishlistScreen from './components/WishlistScreen';
+import { subscribeToAuthChanges, loginUser, registerUser, logoutUser } from './services/firebaseService';
 
 // --- I18n Language & Auth System ---
 const translations = {
@@ -410,7 +409,7 @@ const CartIcon: React.FC<{ isActive: boolean }> = ({ isActive }) => (
 );
 
 const OrderIcon: React.FC<{ isActive: boolean }> = ({ isActive }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 transition-colors ${isActive ? 'text-black' : 'text-current'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={isActive ? 2.5 : 2}>
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={isActive ? 2.5 : 2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
     </svg>
 );
@@ -422,7 +421,7 @@ const SearchIcon: React.FC<{ isActive: boolean }> = ({ isActive }) => (
 );
 
 const HeartIcon: React.FC<{ isActive: boolean }> = ({ isActive }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 transition-colors ${isActive ? 'text-pink-500 fill-pink-500' : 'text-current'}`} fill={isActive ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={isActive ? 0 : 2}>
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={isActive ? 2.5 : 2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
     </svg>
 );

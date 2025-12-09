@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ok-E-store | भूत भविष्य वर्तमान</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Hindi:ital@0;1&family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', 'Tiro Devanagari Hindi', sans-serif;
+            background-attachment: fixed;
+            transition: background 0.8s ease-in-out;
+        }
+        
+        /* Global Tap Highlight Color for Mobile - Dark Green */
+        * {
+            -webkit-tap-highlight-color: rgba(0, 100, 0, 0.3) !important;
+        }
+
+        body[data-theme="cosmic"] {
+            background-color: #050200; /* Dark base color */
+            background-image: radial-gradient(ellipse at center, rgba(255, 153, 51, 0.15) 0%, transparent 70%);
+        }
+
+        body[data-theme="sunrise"] {
+            background-color: #050410;
+            background-image: linear-gradient(to top, #050410 0%, #191734 100%);
+        }
+
+        body[data-theme="forest"] {
+            background-color: #101c13;
+            background-image: linear-gradient(to top, #050705 0%, #112911 100%);
+        }
+        
+        /* New Simple Themes */
+        body[data-theme="dark"] {
+            background-color: #000000;
+            background-image: none;
+        }
+        body[data-theme="rose"] {
+            background-color: #3b0414;
+            background-image: none;
+        }
+        body[data-theme="sky"] {
+            background-color: #062235;
+            background-image: none;
+        }
+        body[data-theme="emerald"] {
+            background-color: #011f18;
+            background-image: none;
+        }
+        body[data-theme="saffron"] {
+            background-color: #301202;
+            background-image: none;
+        }
+        body[data-theme="grey"] {
+            background-color: #1f2937; /* gray-800 */
+            background-image: none;
+        }
+
+        /* Light Theme */
+        body[data-theme="light"] {
+            background-color: #f9fafb; /* gray-50 */
+            color: #1f2937; /* gray-800 */
+        }
+        body[data-theme="light"] #solar-system { display: none; }
+        body[data-theme="light"] .text-white,
+        body[data-theme="light"] .text-purple-200,
+        body[data-theme="light"] .text-purple-300,
+        body[data-theme="light"] .text-purple-400\/60,
+        body[data-theme="light"] .text-white\/90 {
+            color: #1f2937;
+        }
+        body[data-theme="light"] a.text-purple-300,
+        body[data-theme="light"] button.text-purple-300 {
+            color: #6d28d9;
+        }
+        body[data-theme="light"] a.text-purple-300:hover,
+        body[data-theme="light"] button.text-purple-300:hover {
+            color: #4c1d95;
+        }
+        body[data-theme="light"] .bg-white\/10,
+        body[data-theme="light"] .bg-white\/5 {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-color: #e5e7eb;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+        }
+        body[data-theme="light"] .bg-slate-900\/90 { /* Login, notifications */
+            background-color: rgb(249 250 251 / 0.95);
+            border-color: #d1d5db;
+        }
+        body[data-theme="light"] .border-white\/20 {
+            border-color: #e5e7eb;
+        }
+        body[data-theme="light"] .text-pink-400 { color: #db2777; }
+        body[data-theme="light"] .text-pink-300 { color: #ec4899; }
+        body[data-theme="light"] .text-blue-300 { color: #60a5fa; }
+        body[data-theme="light"] .text-yellow-300 { color: #facc15; }
+        body[data-theme="light"] .font-hindi.text-white { color: #111827; }
+        body[data-theme="light"] input,
+        body[data-theme="light"] textarea,
+        body[data-theme="light"] select {
+            color: #111827;
+        }
+        body[data-theme="light"] input::placeholder,
+        body[data-theme="light"] textarea::placeholder {
+            color: #6b7280;
+        }
+        body[data-theme="light"] .hover\:bg-purple-500\/20:hover {
+            background-color: rgba(168, 85, 247, 0.1);
+        }
+        body[data-theme="light"] .text-purple-300.border-b-2 { /* Category title */
+            color: #581c87;
+        }
+        body[data-theme="light"] .tracker-step.completed .tracker-label {
+          color: #1f2937;
+        }
+        body[data-theme="light"] .selection\:bg-purple-500::selection {
+            background-color: #a855f7;
+        }
+        body[data-theme="light"] .selection\:text-white::selection {
+            color: #fff;
+        }
+
+        .font-hindi {
+            font-family: 'Tiro Devanagari Hindi', serif;
+        }
+        @keyframes fadeInSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(1rem);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-fade-in {
+            animation: fadeInSlideUp 0.6s ease-out forwards;
+        }
+        
+        .app-container {
+            background: transparent !important;
+        }
+        .app-bg-image {
+            display: none !important;
+        }
+
+        /* Navagraha Animation Styles */
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        #solar-system {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+        }
+        body[data-theme="cosmic"] #solar-system {
+            display: none;
+            opacity: 1;
+        }
+        .sun {
+            position: absolute;
+            width: 25vmin;
+            height: 25vmin;
+            background: radial-gradient(ellipse at center, rgba(255, 153, 51, 0.2) 0%, rgba(255, 153, 51, 0) 70%);
+            border-radius: 50%;
+        }
+        .planet-orbit {
+            position: absolute;
+            border: 1px solid rgba(255, 153, 51, 0.15);
+            border-radius: 50%;
+            animation: rotate linear infinite;
+        }
+        .planet {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            box-shadow: inset 0 0 0.5vmin rgba(0,0,0,0.5);
+        }
+        .mercury-orbit { width: 12vmin; height: 12vmin; animation-duration: 8.8s; }
+        .mercury { width: 0.8vmin; height: 0.8vmin; background: #9c9c9c; }
+        .venus-orbit { width: 18vmin; height: 18vmin; animation-duration: 15.2s; }
+        .venus { width: 1.4vmin; height: 1.4vmin; background: #e6e6e6; box-shadow: 0 0 1vmin #fff, inset 0 0 0.5vmin rgba(0,0,0,0.5); }
+        .moon-orbit { width: 25vmin; height: 25vmin; animation-duration: 27.3s; }
+        .moon { width: 1.2vmin; height: 1.2vmin; background: #f0f0f0; }
+        .mars-orbit { width: 33vmin; height: 33vmin; animation-duration: 35.8s; }
+        .mars { width: 1vmin; height: 1vmin; background: #e27b58; }
+        .jupiter-orbit { width: 45vmin; height: 45vmin; animation-duration: 60.1s; }
+        .jupiter { width: 2.4vmin; height: 2.4vmin; background: #d8ca9d; }
+        .saturn-orbit { width: 60vmin; height: 60vmin; animation-duration: 84.4s; }
+        .saturn { width: 2vmin; height: 2vmin; background: #c8b79e; }
+        .saturn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 180%;
+            height: 180%;
+            margin-left: -90%;
+            margin-top: -90%;
+            border: 0.2vmin solid rgba(200, 183, 158, 0.7);
+            border-radius: 50%;
+            transform: rotateX(70deg);
+        }
+        .rahu-ketu-orbit { width: 75vmin; height: 75vmin; animation-duration: 120s; border-style: dashed; animation-direction: reverse; }
+        .rahu { width: 1.5vmin; height: 1.5vmin; background: radial-gradient(circle, rgba(50,50,50,0.8) 0%, rgba(0,0,0,0.5) 100%); }
+        .ketu { top: 50%; left: 100%; width: 1.5vmin; height: 1.5vmin; background: radial-gradient(circle, rgba(50,50,50,0.8) 0%, rgba(0,0,0,0.5) 100%); }
+
+
+        /* Toggle Switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #a855f7;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #a855f7;
+        }
+
+        /* Auto Pay Toggle Switch */
+        .auto-pay-toggle {
+            position: relative;
+            width: 48px;
+            height: 24px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .auto-pay-toggle.active {
+            background-color: #a855f7; /* purple-500 */
+            border-color: #c084fc; /* purple-400 */
+        }
+        .auto-pay-toggle-knob {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+        }
+        .auto-pay-toggle.active .auto-pay-toggle-knob {
+            transform: translateX(24px);
+        }
+
+        /* Prashna Chakra Styles */
+        .chakra-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 1.5rem auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .chakra-wheel {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 8px solid #a855f7; /* purple-500 */
+            background: conic-gradient(
+                #ec4899 0% 6.25%,      /* pink */
+                #d946ef 6.25% 12.5%,   /* fuchsia */
+                #a855f7 12.5% 18.75%,  /* purple */
+                #8b5cf6 18.75% 25%,    /* violet */
+                #6366f1 25% 31.25%,    /* indigo */
+                #3b82f6 31.25% 37.5%,   /* blue */
+                #22d3ee 37.5% 43.75%,  /* cyan */
+                #10b981 43.75% 50%,    /* emerald */
+                #ec4899 50% 56.25%,      /* pink */
+                #d946ef 56.25% 62.5%,   /* fuchsia */
+                #a855f7 62.5% 68.75%,  /* purple */
+                #8b5cf6 68.75% 75%,    /* violet */
+                #6366f1 75% 81.25%,    /* indigo */
+                #3b82f6 81.25% 87.5%,   /* blue */
+                #22d3ee 87.5% 93.75%,  /* cyan */
+                #10b981 93.75% 100%    /* emerald */
+            );
+            box-shadow: 0 0 25px #a855f7, inset 0 0 20px rgba(0,0,0,0.6);
+            transition: transform 4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .chakra-labels {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+        .chakra-label-item {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-origin: center;
+            width: 160px; /* Width of the label text */
+            margin-left: -80px; /* Half of width */
+            margin-top: -10px; /* Half of approximate height */
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+            pointer-events: none;
+        }
+        .chakra-pointer {
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 30px solid #f87171; /* red-400 */
+            position: absolute;
+            top: -25px;
+            z-index: 10;
+            filter: drop-shadow(0 -2px 2px rgba(0,0,0,0.5));
+        }
+        .chakra-center-knob {
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #fbcfe8, #a855f7);
+            border-radius: 50%;
+            position: absolute;
+            z-index: 5;
+            border: 3px solid white;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+        
+        /* New Loading Animations */
+        /* Image Loading Animation */
+        .image-loading-container {
+            position: relative;
+            width: 128px;
+            height: 128px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .image-loading-container .pulse-ring {
+            position: absolute;
+            border: 3px solid #a855f7;
+            border-radius: 50%;
+            animation: pulse-out 1.5s ease-out infinite;
+            opacity: 0;
+        }
+        @keyframes pulse-out {
+            0% {
+                transform: scale(0.1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.2);
+                opacity: 0;
+            }
+        }
+        .image-loading-container .pulse-ring:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+        .image-loading-container .pulse-ring:nth-child(3) {
+            animation-delay: 1s;
+        }
+
+        /* Video Loading Animation */
+        .video-loading-container {
+            width: 150px;
+            height: 50px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            background: rgba(0,0,0,0.3);
+        }
+        .video-loading-container::before, .video-loading-container::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background-image: repeating-linear-gradient(to right, #fff 0, #fff 3px, transparent 3px, transparent 7px);
+        }
+        .video-loading-container::before { top: 0; }
+        .video-loading-container::after { bottom: 0; }
+
+        .film-strip {
+            position: absolute;
+            top: 5px;
+            bottom: 5px;
+            left: 0;
+            width: 300%; /* Make it wider than the container */
+            background-image: repeating-linear-gradient(to right, transparent 0, transparent 48px, rgba(255,255,255,0.5) 48px, rgba(255,255,255,0.5) 50px);
+            animation: slide-film 1.5s linear infinite;
+        }
+        @keyframes slide-film {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50px); }
+        }
+
+        /* Tool Showcase Slider */
+        @keyframes slide-content-fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .slide-content-anim {
+            animation: slide-content-fade-in 0.8s ease-out forwards;
+        }
+        
+        @keyframes icon-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .icon-float {
+            animation: icon-float 5s ease-in-out infinite;
+        }
+
+        @keyframes icon-glow {
+            0%, 100% { text-shadow: 0 0 15px #f59e0b, 0 0 25px #ea580c; }
+            50% { text-shadow: 0 0 25px #f59e0b, 0 0 45px #ea580c, 0 0 5px #fff; }
+        }
+        .icon-glow {
+            animation: icon-glow 4s ease-in-out infinite;
+        }
+
+        @keyframes icon-glow-saffron {
+            0%, 100% { filter: drop-shadow(0 0 5px rgba(249, 115, 22, 0.7)); }
+            50% { filter: drop-shadow(0 0 20px rgba(249, 115, 22, 1)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.5)); }
+        }
+        .icon-glow-saffron {
+            animation: icon-glow-saffron 8s ease-in-out infinite;
+        }
+
+        /* Click Flash Animation */
+        @keyframes click-flash-green {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0.8; }
+            100% { transform: translate(-50%, -50%) scale(2.0); opacity: 0; }
+        }
+        .click-flash-effect {
+            position: fixed;
+            width: 40px;
+            height: 40px;
+            /* Dark Green Flash */
+            background: radial-gradient(circle, rgba(0, 100, 0, 0.9) 0%, rgba(0, 100, 0, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            animation: click-flash-green 0.4s ease-out forwards;
+        }
+
+        /* Green Flash Pulse Animation for Header Icons */
+        @keyframes flash-green {
+            0% { filter: drop-shadow(0 0 0 transparent); transform: scale(1); }
+            50% { filter: drop-shadow(0 0 15px #22c55e); transform: scale(1.1); color: #22c55e; }
+            100% { filter: drop-shadow(0 0 0 transparent); transform: scale(1); }
+        }
+        .animate-flash-green {
+            animation: flash-green 2s infinite ease-in-out;
+        }
+
+        /* Category Tabs Scrollbar Hiding */
+        .category-tabs::-webkit-scrollbar {
+            display: none;
+        }
+        .category-tabs {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        
+        /* Store specific styles */
+        .order-tracker {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          position: relative;
+          margin: 2rem 0;
+        }
+        .order-tracker::before {
+          content: '';
+          position: absolute;
+          top: 16px;
+          left: 10%;
+          right: 10%;
+          height: 4px;
+          background-color: #4a044e; /* purple-900 */
+          z-index: 0;
+        }
+        .tracker-progress {
+          position: absolute;
+          top: 16px;
+          left: 10%;
+          height: 4px;
+          background: linear-gradient(to right, #a855f7, #ec4899);
+          width: 0;
+          z-index: 1;
+          transition: width 1s ease-in-out;
+        }
+        .tracker-step {
+          position: relative;
+          z-index: 2;
+          text-align: center;
+          width: 25%;
+        }
+        .tracker-icon {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          background-color: #4a044e;
+          border: 4px solid #1e293b; /* slate-800 */
+          margin: 0 auto 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #9333ea; /* purple-600 */
+          transition: all 0.5s ease;
+        }
+        .tracker-step.completed .tracker-icon {
+          background-color: #a855f7;
+          color: white;
+          border-color: #4a044e;
+        }
+        .tracker-label {
+          font-size: 0.8rem;
+          color: #9ca3af; /* gray-400 */
+          transition: color 0.5s ease;
+        }
+        .tracker-step.completed .tracker-label {
+          color: white;
+          font-weight: 600;
+        }
+
+        /* Side Menu */
+        .side-menu {
+            transform: translateX(-100%);
+        }
+        .side-menu.open {
+            transform: translateX(0);
+        }
+        .menu-backdrop {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .menu-backdrop.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        /* Notification Bell */
+        .notification-panel {
+            opacity: 0;
+            transform: translateY(-10px) scale(0.95);
+            transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+            pointer-events: none;
+            will-change: transform, opacity;
+        }
+        .notification-panel.open {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+        
+        /* Live Astrologer Screen */
+        .mic-icon-pulse {
+            animation: pulse-glow 2s infinite ease-in-out;
+        }
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(168, 85, 247, 0.6), 0 0 30px rgba(236, 72, 153, 0.6);
+                filter: drop-shadow(0 0 5px rgba(168, 85, 247, 0.8));
+            }
+            50% {
+                box-shadow: 0 0 35px rgba(168, 85, 247, 0.9), 0 0 50px rgba(236, 72, 153, 0.9), 0 0 10px #fff;
+                filter: drop-shadow(0 0 15px rgba(168, 85, 247, 1));
+            }
+        }
+        .transcript-entry {
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeInSlideUp 0.5s ease-out forwards;
+        }
+        .transcript-user {
+            text-align: right;
+            margin-left: auto;
+        }
+        .transcript-ai {
+            text-align: left;
+            margin-right: auto;
+        }
+        
+        /* Like button animation */
+        @keyframes like-pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.4); }
+            100% { transform: scale(1); }
+        }
+        .like-animation {
+            animation: like-pop 0.3s ease-out;
+        }
+        .like-btn-liked {
+            color: #ec4899; /* pink-500 */
+        }
+        
+        /* Order Icon Highlight */
+        @keyframes yellow-pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 10px rgba(251, 191, 36, 0.4), 0 0 20px rgba(245, 158, 11, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(251, 191, 36, 0.7), 0 0 35px rgba(245, 158, 11, 0.5);
+            }
+        }
+        .yellow-pulse-highlight {
+            animation: yellow-pulse-glow 2s infinite ease-in-out;
+            border-color: #facc15; /* yellow-400 */
+            background-color: rgba(250, 204, 21, 0.1);
+        }
+
+        /* Saffron Theme Overrides */
+        body[data-theme="saffron"] {
+            --color-primary-text: #fdba74; /* orange-300 */
+            --color-secondary-text: #fb923c; /* orange-400 */
+            --color-accent: #f97316; /* orange-500 */
+            --color-accent-dark: #ea580c; /* orange-600 */
+            --color-accent-darker: #7c2d12; /* orange-900 */
+            --color-highlight: #fbbf24; /* amber-400 */
+        }
+        body[data-theme="saffron"] .text-purple-200,
+        body[data-theme="saffron"] .text-purple-300 {
+            color: var(--color-primary-text);
+        }
+        body[data-theme="saffron"] .text-pink-400,
+        body[data-theme="saffron"] .text-pink-300 {
+            color: var(--color-secondary-text);
+        }
+        body[data-theme="saffron"] .bg-gradient-to-r.from-purple-400.to-pink-500 {
+            background-image: linear-gradient(to right, var(--color-highlight), var(--color-accent));
+        }
+        body[data-theme="saffron"] .bg-gradient-to-r.from-purple-600.to-pink-600 {
+            background-image: linear-gradient(to right, var(--color-accent), var(--color-accent-dark));
+        }
+        body[data-theme="saffron"] .border-purple-400,
+        body[data-theme="saffron"] .border-purple-500\/20,
+        body[data-theme="saffron"] .focus\:ring-purple-400:focus {
+            border-color: var(--color-secondary-text);
+            --tw-ring-color: var(--color-secondary-text);
+        }
+        body[data-theme="saffron"] .hover\:bg-purple-500\/20:hover,
+        body[data-theme="saffron"] .hover\:bg-purple-500\/10:hover {
+            background-color: rgba(249, 115, 22, 0.2);
+        }
+        body[data-theme="saffron"] .hover\:shadow-purple-500\/20:hover {
+            --tw-shadow-color: rgba(249, 115, 22, 0.2);
+            --tw-shadow: var(--tw-shadow-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+        }
+        body[data-theme="saffron"] .selection\:bg-purple-500::selection {
+            background-color: #f97316;
+        }
+        body[data-theme="saffron"] .selection\:text-white::selection {
+            color: #fff;
+        }
+        body[data-theme="saffron"] .pulse-ring {
+            border-color: #f97316;
+        }
+        body[data-theme="saffron"] .chakra-wheel {
+            border-color: #f97316;
+            background: conic-gradient(#fb923c 0% 12.5%, #f59e0b 12.5% 25%, #eab308 25% 37.5%, #fbbf24 37.5% 50%, #fb923c 50% 62.5%, #f59e0b 62.5% 75%, #eab308 75% 87.5%, #fbbf24 87.5% 100%);
+            box-shadow: 0 0 25px #f97316, inset 0 0 20px rgba(0,0,0,0.6);
+        }
+        body[data-theme="saffron"] .chakra-center-knob {
+            background: radial-gradient(circle, #fcd34d, #f97316);
+        }
+        body[data-theme="saffron"] .auto-pay-toggle.active {
+            background-color: #f97316;
+            border-color: #fb923c;
+        }
+        body[data-theme="saffron"] .order-tracker::before { background-color: #7c2d12; }
+        body[data-theme="saffron"] .tracker-progress { background: linear-gradient(to right, #f97316, #f59e0b); }
+        body[data-theme="saffron"] .tracker-icon { background-color: #7c2d12; color: #ea580c; }
+        body[data-theme="saffron"] .tracker-step.completed .tracker-icon { background-color: #f97316; border-color: #7c2d12; }
+        body[data-theme="saffron"] .like-btn-liked { color: #fb923c; }
+        body[data-theme="saffron"] .mic-icon-pulse {
+             animation: pulse-glow-saffron 2s infinite ease-in-out;
+        }
+        @keyframes pulse-glow-saffron {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(249, 115, 22, 0.6), 0 0 30px rgba(234, 88, 12, 0.6);
+            }
+            50% {
+                box-shadow: 0 0 35px rgba(249, 115, 22, 0.9), 0 0 50px rgba(234, 88, 12, 0.9);
+            }
+        }
+        body[data-theme="saffron"] .transcript-user .p-3 {
+            background-color: rgba(124, 45, 18, 0.6); /* orange-900 */
+        }
+
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.23.0",
+    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^6.25.1",
+    "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+    "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js",
+    "firebase/storage": "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js",
+    "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js",
+    "firebase/": "https://aistudiocdn.com/firebase@^12.6.0/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body data-theme="cosmic">
+    <div id="solar-system">
+        <div class="sun"></div>
+        <div class="planet-orbit mercury-orbit">
+            <div class="planet mercury"></div>
+        </div>
+        <div class="planet-orbit venus-orbit">
+            <div class="planet venus"></div>
+        </div>
+        <div class="planet-orbit moon-orbit">
+            <div class="planet moon"></div>
+        </div>
+        <div class="planet-orbit mars-orbit">
+            <div class="planet mars"></div>
+        </div>
+        <div class="planet-orbit jupiter-orbit">
+            <div class="planet jupiter"></div>
+        </div>
+        <div class="planet-orbit saturn-orbit">
+            <div class="planet saturn"></div>
+        </div>
+        <div class="planet-orbit rahu-ketu-orbit">
+            <div class="planet rahu"></div>
+            <div class="planet ketu"></div>
+        </div>
+    </div>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+</body>
+</html>
