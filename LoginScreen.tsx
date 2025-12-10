@@ -1,9 +1,10 @@
+
 import React, { useState, FormEvent } from 'react';
 import { UserProfile } from '../types';
 
 interface LoginScreenProps {
     onClose: () => void;
-    onLogin: (email: string, password: string) => Promise<boolean>;
+    onLogin: (email: string, password: string) => Promise<string | null>;
     onSignup: (profile: UserProfile) => Promise<boolean>;
 }
 
@@ -36,10 +37,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onClose, onLogin, onSignup })
         }
 
         setIsLoading(true);
-        const success = await onLogin(cleanEmail, password);
+        const errorMessage = await onLogin(cleanEmail, password);
         setIsLoading(false);
-        if (!success) {
-            setError('लॉगिन विफल। कृपया ईमेल और पासवर्ड की जांच करें।');
+        
+        if (errorMessage) {
+            setError(errorMessage);
         }
     };
 
@@ -82,15 +84,28 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onClose, onLogin, onSignup })
         }
     };
 
+    const fillDemoCredentials = () => {
+        setEmail('demo@example.com');
+        setPassword('password');
+    };
+
     const renderLoginForm = () => (
         <form onSubmit={handleLoginSubmit} className="space-y-4">
             <h2 className="text-2xl font-hindi font-bold text-white mb-4 text-center">लॉगिन करें</h2>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ईमेल" required className="w-full bg-white/10 p-3 rounded-lg border border-white/20"/>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="पासवर्ड" required className="w-full bg-white/10 p-3 rounded-lg border border-white/20"/>
-            {error && <p className="text-red-400 text-center">{error}</p>}
-            <button type="submit" disabled={isLoading} className="w-full mt-6 px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-full shadow-lg disabled:opacity-60">
+            
+            {error && <p className="text-red-400 text-center text-sm p-2 bg-red-900/30 rounded">{error}</p>}
+            
+            <button type="submit" disabled={isLoading} className="w-full mt-4 px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-full shadow-lg disabled:opacity-60">
                 {isLoading ? 'प्रतीक्षा करें...' : 'लॉगिन करें'}
             </button>
+
+            <div className="text-center mt-4">
+                <button type="button" onClick={fillDemoCredentials} className="text-xs text-purple-300 hover:text-white underline">
+                    डेमो लॉगिन (Testing)
+                </button>
+            </div>
         </form>
     );
 

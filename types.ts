@@ -70,12 +70,18 @@ export interface UserProfile {
     profilePicture?: string; // base64 encoded image
     phone?: string;
     signupDate?: string;
+    
+    // Premium Subscription Fields
+    subscriptionPlan?: 'Weekly' | 'Monthly' | 'Yearly';
+    subscriptionExpiry?: string; // ISO Date String
+    isPremium?: boolean;
 }
 
 export interface VerificationRequest {
     id: string;
     userName: string;
     userPhone: string;
+    userEmail?: string; // Added for robust matching
     planName: string;
     planPrice: number;
     screenshotDataUrl?: string;

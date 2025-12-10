@@ -1,4 +1,6 @@
 
+
+
 import React, { useState, FormEvent, useEffect, useRef } from 'react';
 import { Product, ProductCategory, ProductType, VerificationRequest, Order, SupportTicket, SocialMediaPost } from '../types';
 import Card from './Card';
@@ -91,6 +93,7 @@ const VerificationManager: React.FC<{
                                     <p className="text-sm text-purple-300">उपयोगकर्ता</p>
                                     <p className="font-semibold text-white">{req.userName}</p>
                                     <p className="font-mono text-white">{req.userPhone}</p>
+                                    {req.userEmail && <p className="text-xs text-gray-400 truncate mt-1">{req.userEmail}</p>}
                                 </div>
                                 <div>
                                     <div className="flex items-center gap-2">

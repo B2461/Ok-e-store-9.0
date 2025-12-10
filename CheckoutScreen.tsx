@@ -1,4 +1,6 @@
 
+
+
 import React, { useState, FormEvent, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { CartItem, CustomerDetails, VerificationRequest } from '../types';
@@ -236,6 +238,7 @@ const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ cartItems, onPlaceOrder
             onVerificationRequest({
                 userName: finalCustomer.name,
                 userPhone: finalCustomer.phone,
+                userEmail: finalCustomer.email, // Pass email for matching
                 planName: `Store Order: ${itemsSummaryText.substring(0, 100)}`,
                 planPrice: total,
                 screenshotDataUrl,
