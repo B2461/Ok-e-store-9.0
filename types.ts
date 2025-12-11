@@ -1,55 +1,60 @@
 
-
-// Fix: Added UserInput, Reading, and SavedReading interfaces to resolve import errors.
 export interface UserInput {
     name?: string;
     dob?: string;
-    timeOfBirth?: string;
-    placeOfBirth?: string;
     image?: File;
     question?: string;
-
-    // For specific tools
-    zodiacSign?: string;
+    // Store specific
+    address?: string;
+    city?: string;
+    state?: string;
+    pincode?: string;
+    
+    // Added for specific tools
     selectedZodiac?: string;
-    horoscopeType?: 'daily' | 'weekly' | 'monthly';
+    horoscopeType?: 'weekly' | 'monthly' | 'daily';
+    name1?: string;
+    name2?: string;
+    timeOfBirth?: string;
+    placeOfBirth?: string;
+    zodiacSign?: string;
     selectedMonth?: string;
     targetLanguage?: string;
     boyName?: string;
     boyDob?: string;
     girlName?: string;
     girlDob?: string;
-    name1?: string;
-    name2?: string;
-    storyPremise?: string;
-    startLocation?: string;
-    endLocation?: string;
     voice?: 'female' | 'male';
+    storyPremise?: string;
     resolution?: '720p' | '1080p';
     aspectRatio?: '16:9' | '9:16';
-    category?: string;
-    characters?: string,
-    setting?: string,
-    visualStyle?: string,
-    musicStyle?: string,
-    addVoiceOver?: boolean,
-    addCaptions?: boolean,
+    characters?: string;
+    setting?: string;
+    visualStyle?: string;
+    musicStyle?: string;
+    addVoiceOver?: boolean;
+    addCaptions?: boolean;
     desiredDuration?: string;
+    startLocation?: string;
+    endLocation?: string;
+    category?: string; // For Prashna Chakra
 }
 
 export interface Reading {
     past: string;
     present: string;
     future: string;
-    cardName?: string;
     imageUrl?: string;
+    
+    // Added for specific tools
+    cardName?: string;
     compatibilityPercentage?: number;
     audioBase64?: string;
     videoUrl?: string;
     videoDownloadUrl?: string;
+    codeSnippets?: { file: string; code: string; language: string }[];
     startLocation?: string;
     endLocation?: string;
-    codeSnippets?: { file: string; code: string; language: string }[];
 }
 
 export interface SavedReading {
@@ -61,32 +66,37 @@ export interface SavedReading {
 
 export interface UserProfile {
     name?: string;
-    dob?: string;
-    timeOfBirth?: string;
-    placeOfBirth?: string;
     email?: string;
     password?: string;
-
-    profilePicture?: string; // base64 encoded image
+    profilePicture?: string;
     phone?: string;
     signupDate?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    pincode?: string;
     
     // Premium Subscription Fields
     subscriptionPlan?: 'Weekly' | 'Monthly' | 'Yearly';
-    subscriptionExpiry?: string; // ISO Date String
+    subscriptionExpiry?: string;
     isPremium?: boolean;
+
+    // Added missing profile fields
+    dob?: string;
+    timeOfBirth?: string;
+    placeOfBirth?: string;
 }
 
 export interface VerificationRequest {
     id: string;
     userName: string;
     userPhone: string;
-    userEmail?: string; // Added for robust matching
+    userEmail?: string;
     planName: string;
     planPrice: number;
     screenshotDataUrl?: string;
     requestDate: string;
-    type: 'SUBSCRIPTION' | 'PRODUCT'; // Keeping SUBSCRIPTION for backward compatibility in admin panel
+    type: 'SUBSCRIPTION' | 'PRODUCT';
     transactionId?: string;
     autoRenew?: boolean;
     orderId?: string;
@@ -105,100 +115,85 @@ export interface SupportTicket {
 export interface SocialMediaPost {
   id: string;
   content: string;
-  imageUrl?: string; // base64 encoded image
+  imageUrl?: string;
   platforms: ('Facebook' | 'Instagram' | 'Twitter')[];
   createdAt: string;
 }
 
-
-// Fix: Added all missing enum members to resolve property access errors on DivinationType.
 export enum DivinationType {
+    // Store Categories
     PUJAN_SAMAGRI = 'पूजन सामग्री',
     TANTRA_MANTRA_YANTRA_EBOOK = 'तंत्र मंत्र यन्त्र PDF E-book',
     MOBILE_ACCESSORIES = 'मोबाइल एक्सेसरीज',
-    ADMIN_PANEL = 'एडमिन पैनल',
     GEMS_JEWELRY = 'रत्न आभूषण',
     LADIES_GENTS_BABY_SHOES = 'लेडीज जेंट्स एंड बेबी शूज',
     LADIES_GENTS_ACCESSORIES = 'लेडीज एंड जेंट्स पर्स बैग बेल्ट चाबी का गुच्छा',
-    // Special types for showcase slider navigation
+    
+    // Navigation
     DIVINATION_STORE = 'आध्यात्मिक स्टोर',
     DIVINATION_SHOPPING = 'शॉपिंग',
+    ADMIN_PANEL = 'एडमिन पैनल',
 
-    // Astrology Tools
-    ASTROLOGY = 'ज्योतिष',
-    NUMEROLOGY = 'अंक ज्योतिष',
-    JANAM_KUNDLI = 'जन्म कुंडली',
-    PALMISTRY = 'हस्तरेखा',
-    TAROT = 'टैरो कार्ड',
-    DREAM = 'स्वप्न फल',
-    ZODIAC = 'राशिफल',
-    HOROSCOPE = 'राशिफल देखें',
-    DAILY_HOROSCOPE = 'आज का राशिफल',
-    MARRIAGE_COMPATIBILITY = 'विवाह अनुकूलता',
-    LOVE_COMPATIBILITY = 'प्रेम संगतता',
-    BUSINESS_ASTROLOGY = 'व्यापार ज्योतिष',
-    MOLE = 'तिल विचार',
-    LOVE_RELATIONSHIP = 'प्रेम संबंध',
-    ANG_SPHURAN = 'अंग स्फुरण',
-    SNEEZING = 'छींक विचार',
-    TRIKAL_GYAN = 'त्रिकाल ज्ञान',
-    PRASHNA_PARIKSHA = 'प्रश्न परीक्षा',
-    PRASHNA_CHAKRA = 'प्रश्न चक्र',
-    VASTU_SHASTRA = 'वास्तु शास्त्र',
-    DAILY_FORTUNE_CARD = 'आज का भाग्य कार्ड',
-
-    // AI Tools
-    AI_FACE_READING = 'AI चेहरा पढ़ना',
-    AI_TIME_MACHINE = 'AI टाइम मशीन',
-    AI_FUTURE_GENERATOR = 'AI भविष्य जेनरेटर',
+    // Tools
+    TAROT = 'टैरो कार्ड रीडिंग',
+    ASTROLOGY = 'ज्योतिष भविष्यवाणी',
+    HOROSCOPE = 'राशिफल',
+    DAILY_HOROSCOPE = 'दैनिक राशिफल',
+    LOVE_COMPATIBILITY = 'प्रेम अनुकूलता',
+    DREAM = 'स्वप्न व्याख्या',
     AI_CALCULATOR = 'AI कैलकुलेटर',
-    OBJECT_COUNTER = 'वस्तु गणक',
-    PRODUCT_SCANNER = 'उत्पाद स्कैनर',
-    SCAN_TRANSLATE = 'स्कैन और अनुवाद करें',
-    TEXT_TO_IMAGE = 'टेक्स्ट से छवि',
-    TEXT_TO_VOICE = 'टेक्स्ट से आवाज',
-    STORY_TO_IMAGES = 'कहानी से छवियां',
+    CODE_INSPECTOR = 'कोड इंस्पेक्टर',
+    DAILY_FORTUNE_CARD = 'दैनिक भाग्य कार्ड',
+    TRIKAL_GYAN = 'त्रिकाल ज्ञान',
+    NUMEROLOGY = 'अंक ज्योतिष',
+    BUSINESS_ASTROLOGY = 'व्यापार ज्योतिष',
+    ROUTE_PLANNER = 'मार्ग योजना',
+    YOGA_GUIDE_HINDI = 'योग गाइड',
+    STORY_TO_VIDEO = 'कहानी से वीडियो',
     FUTURE_STORY = 'भविष्य की कहानी',
     IMAGE_TO_VIDEO = 'छवि से वीडियो',
-    STORY_TO_VIDEO = 'कहानी से वीडियो',
-    LIVE_ASTROLOGER = 'लाइव ज्योतिषी',
-
-    // Lifestyle & Info
-    SEASONAL_FOOD = 'मौसमी भोजन',
-    FOOD_COMBINATION = 'विरुद्ध भोजन',
-    RELIGIOUS_RITUALS = 'धार्मिक अनुष्ठान',
-    ENGLISH_GURU = 'इंग्लिश गुरु',
-    YOGA_GUIDE_HINDI = 'योग गाइड',
-    TIME_MANAGEMENT = 'समय प्रबंधन',
-
-    // Travel & Location
+    JANAM_KUNDLI = 'जन्म कुंडली',
+    PALMISTRY = 'हस्तरेखा',
+    AI_FACE_READING = 'चेहरा पढ़ना',
+    AI_TIME_MACHINE = 'AI टाइम मशीन',
+    OBJECT_COUNTER = 'वस्तु गणक',
+    PRODUCT_SCANNER = 'उत्पाद स्कैनर',
+    MARRIAGE_COMPATIBILITY = 'विवाह अनुकूलता',
+    SCAN_TRANSLATE = 'स्कैन और अनुवाद',
+    TEXT_TO_VOICE = 'टेक्स्ट से आवाज़',
+    TEXT_TO_IMAGE = 'टेक्स्ट से छवि',
+    STORY_TO_IMAGES = 'कहानी से चित्र',
     PILGRIMAGE = 'तीर्थ यात्रा',
-    TRAVEL = 'यात्रा शकुन',
-    DISHA_SHOOL = 'दिशा शूल',
+    TRAVEL = 'यात्रा भविष्यवाणी',
+    MOLE = 'तिल विचार',
+    LOVE_RELATIONSHIP = 'प्रेम संबंध विश्लेषण',
+    ANG_SPHURAN = 'अंग फड़कना',
+    SNEEZING = 'छींक विचार',
+    FOOD_COMBINATION = 'भोजन संयोजन',
+    RELIGIOUS_RITUALS = 'धार्मिक अनुष्ठान',
+    PRASHNA_PARIKSHA = 'प्रश्न परीक्षा',
     FAMOUS_PLACE_TRAVEL = 'प्रसिद्ध स्थान यात्रा',
     TRAIN_JOURNEY = 'रेल यात्रा',
+    ENGLISH_GURU = 'इंग्लिश गुरु',
+    VASTU_SHASTRA = 'वास्तु शास्त्र',
+    AI_FUTURE_GENERATOR = 'AI भविष्य जनरेटर',
+    ZODIAC = 'राशि भविष्य',
+    SEASONAL_FOOD = 'मौसमी भोजन',
+    DISHA_SHOOL = 'दिशा शूल',
+    PRASHNA_CHAKRA = 'प्रश्न चक्र',
+    LIVE_ASTROLOGER = 'लाइव ज्योतिषी',
+    TIME_MANAGEMENT = 'समय प्रबंधन',
     LOCAL_EXPERTS = 'स्थानीय विशेषज्ञ',
-    ROUTE_PLANNER = 'मार्ग योजनाकार',
-
-    // Developer Tools
-    CODE_INSPECTOR = 'कोड इंस्पेक्टर',
     HTML_GENERATOR = 'HTML जेनरेटर',
-    LOCAL_MARKETING = 'स्थानीय विपणन',
-
-    // Other
-    PAST_READINGS = 'पिछली रीडिंग्स',
-}
-
-export interface Place {
-    name: string;
-    address: string;
 }
 
 export interface ShowcaseTool {
     type: DivinationType;
     icon: string;
     description: string;
+    descriptionHi?: string;
     motivationalText: string;
+    motivationalTextHi?: string;
     imageUrl?: string;
 }
 
@@ -269,4 +264,9 @@ export interface SubscriptionPlan {
     durationDays: number;
     description: string;
     badge?: string;
+}
+
+export interface Place {
+    name: string;
+    address: string;
 }

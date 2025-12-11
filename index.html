@@ -1,10 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ok-E-store | भूत भविष्य वर्तमान</title>
+    <title>Ok-E-store | Online Shopping</title>
     <!-- Tailwind CSS CDN - Fixes huge icons -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -151,79 +152,6 @@
             display: none !important;
         }
 
-        /* Navagraha Animation Styles */
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        #solar-system {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 0;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.8s ease-in-out;
-        }
-        body[data-theme="cosmic"] #solar-system {
-            display: none;
-            opacity: 1;
-        }
-        .sun {
-            position: absolute;
-            width: 25vmin;
-            height: 25vmin;
-            background: radial-gradient(ellipse at center, rgba(255, 153, 51, 0.2) 0%, rgba(255, 153, 51, 0) 70%);
-            border-radius: 50%;
-        }
-        .planet-orbit {
-            position: absolute;
-            border: 1px solid rgba(255, 153, 51, 0.15);
-            border-radius: 50%;
-            animation: rotate linear infinite;
-        }
-        .planet {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            box-shadow: inset 0 0 0.5vmin rgba(0,0,0,0.5);
-        }
-        .mercury-orbit { width: 12vmin; height: 12vmin; animation-duration: 8.8s; }
-        .mercury { width: 0.8vmin; height: 0.8vmin; background: #9c9c9c; }
-        .venus-orbit { width: 18vmin; height: 18vmin; animation-duration: 15.2s; }
-        .venus { width: 1.4vmin; height: 1.4vmin; background: #e6e6e6; box-shadow: 0 0 1vmin #fff, inset 0 0 0.5vmin rgba(0,0,0,0.5); }
-        .moon-orbit { width: 25vmin; height: 25vmin; animation-duration: 27.3s; }
-        .moon { width: 1.2vmin; height: 1.2vmin; background: #f0f0f0; }
-        .mars-orbit { width: 33vmin; height: 33vmin; animation-duration: 35.8s; }
-        .mars { width: 1vmin; height: 1vmin; background: #e27b58; }
-        .jupiter-orbit { width: 45vmin; height: 45vmin; animation-duration: 60.1s; }
-        .jupiter { width: 2.4vmin; height: 2.4vmin; background: #d8ca9d; }
-        .saturn-orbit { width: 60vmin; height: 60vmin; animation-duration: 84.4s; }
-        .saturn { width: 2vmin; height: 2vmin; background: #c8b79e; }
-        .saturn::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 180%;
-            height: 180%;
-            margin-left: -90%;
-            margin-top: -90%;
-            border: 0.2vmin solid rgba(200, 183, 158, 0.7);
-            border-radius: 50%;
-            transform: rotateX(70deg);
-        }
-        .rahu-ketu-orbit { width: 75vmin; height: 75vmin; animation-duration: 120s; border-style: dashed; animation-direction: reverse; }
-        .rahu { width: 1.5vmin; height: 1.5vmin; background: radial-gradient(circle, rgba(50,50,50,0.8) 0%, rgba(0,0,0,0.5) 100%); }
-        .ketu { top: 50%; left: 100%; width: 1.5vmin; height: 1.5vmin; background: radial-gradient(circle, rgba(50,50,50,0.8) 0%, rgba(0,0,0,0.5) 100%); }
-
-
         /* Toggle Switch */
         .toggle-checkbox:checked {
             right: 0;
@@ -263,85 +191,6 @@
             transform: translateX(24px);
         }
 
-        /* Prashna Chakra Styles */
-        .chakra-container {
-            position: relative;
-            width: 300px;
-            height: 300px;
-            margin: 1.5rem auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .chakra-wheel {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 8px solid #a855f7; /* purple-500 */
-            background: conic-gradient(
-                #ec4899 0% 6.25%,      /* pink */
-                #d946ef 6.25% 12.5%,   /* fuchsia */
-                #a855f7 12.5% 18.75%,  /* purple */
-                #8b5cf6 18.75% 25%,    /* violet */
-                #6366f1 25% 31.25%,    /* indigo */
-                #3b82f6 31.25% 37.5%,   /* blue */
-                #22d3ee 37.5% 43.75%,  /* cyan */
-                #10b981 43.75% 50%,    /* emerald */
-                #ec4899 50% 56.25%,      /* pink */
-                #d946ef 56.25% 62.5%,   /* fuchsia */
-                #a855f7 62.5% 68.75%,  /* purple */
-                #8b5cf6 68.75% 75%,    /* violet */
-                #6366f1 75% 81.25%,    /* indigo */
-                #3b82f6 81.25% 87.5%,   /* blue */
-                #22d3ee 87.5% 93.75%,  /* cyan */
-                #10b981 93.75% 100%    /* emerald */
-            );
-            box-shadow: 0 0 25px #a855f7, inset 0 0 20px rgba(0,0,0,0.6);
-            transition: transform 4s cubic-bezier(0.25, 1, 0.5, 1);
-        }
-        .chakra-labels {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-        }
-        .chakra-label-item {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform-origin: center;
-            width: 160px; /* Width of the label text */
-            margin-left: -80px; /* Half of width */
-            margin-top: -10px; /* Half of approximate height */
-            text-align: center;
-            color: white;
-            font-weight: bold;
-            font-size: 0.8rem;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
-            pointer-events: none;
-        }
-        .chakra-pointer {
-            width: 0;
-            height: 0;
-            border-left: 20px solid transparent;
-            border-right: 20px solid transparent;
-            border-top: 30px solid #f87171; /* red-400 */
-            position: absolute;
-            top: -25px;
-            z-index: 10;
-            filter: drop-shadow(0 -2px 2px rgba(0,0,0,0.5));
-        }
-        .chakra-center-knob {
-            width: 40px;
-            height: 40px;
-            background: radial-gradient(circle, #fbcfe8, #a855f7);
-            border-radius: 50%;
-            position: absolute;
-            z-index: 5;
-            border: 3px solid white;
-            box-shadow: 0 0 10px rgba(255,255,255,0.5);
-        }
         
         /* New Loading Animations */
         /* Image Loading Animation */
@@ -471,6 +320,28 @@
         .animate-flash-green {
             animation: flash-green 2s infinite ease-in-out;
         }
+        
+        /* Saffron and Green Flash Pulse Animation for Premium Icon */
+        @keyframes flash-saffron-green {
+            0% { 
+                color: #FF9933; /* Saffron */
+                filter: drop-shadow(0 0 5px #FF9933);
+                transform: scale(1); 
+            }
+            50% { 
+                color: #138808; /* Green */
+                filter: drop-shadow(0 0 15px #138808);
+                transform: scale(1.15); 
+            }
+            100% { 
+                color: #FF9933; /* Saffron */
+                filter: drop-shadow(0 0 5px #FF9933);
+                transform: scale(1); 
+            }
+        }
+        .animate-flash-saffron-green {
+            animation: flash-saffron-green 1.5s infinite ease-in-out;
+        }
 
         /* Category Tabs Scrollbar Hiding */
         .category-tabs::-webkit-scrollbar {
@@ -574,34 +445,6 @@
             pointer-events: auto;
         }
         
-        /* Live Astrologer Screen */
-        .mic-icon-pulse {
-            animation: pulse-glow 2s infinite ease-in-out;
-        }
-        @keyframes pulse-glow {
-            0%, 100% {
-                box-shadow: 0 0 20px rgba(168, 85, 247, 0.6), 0 0 30px rgba(236, 72, 153, 0.6);
-                filter: drop-shadow(0 0 5px rgba(168, 85, 247, 0.8));
-            }
-            50% {
-                box-shadow: 0 0 35px rgba(168, 85, 247, 0.9), 0 0 50px rgba(236, 72, 153, 0.9), 0 0 10px #fff;
-                filter: drop-shadow(0 0 15px rgba(168, 85, 247, 1));
-            }
-        }
-        .transcript-entry {
-            opacity: 0;
-            transform: translateY(10px);
-            animation: fadeInSlideUp 0.5s ease-out forwards;
-        }
-        .transcript-user {
-            text-align: right;
-            margin-left: auto;
-        }
-        .transcript-ai {
-            text-align: left;
-            margin-right: auto;
-        }
-        
         /* Like button animation */
         @keyframes like-pop {
             0% { transform: scale(1); }
@@ -676,14 +519,6 @@
         body[data-theme="saffron"] .pulse-ring {
             border-color: #f97316;
         }
-        body[data-theme="saffron"] .chakra-wheel {
-            border-color: #f97316;
-            background: conic-gradient(#fb923c 0% 12.5%, #f59e0b 12.5% 25%, #eab308 25% 37.5%, #fbbf24 37.5% 50%, #fb923c 50% 62.5%, #f59e0b 62.5% 75%, #eab308 75% 87.5%, #fbbf24 87.5% 100%);
-            box-shadow: 0 0 25px #f97316, inset 0 0 20px rgba(0,0,0,0.6);
-        }
-        body[data-theme="saffron"] .chakra-center-knob {
-            background: radial-gradient(circle, #fcd34d, #f97316);
-        }
         body[data-theme="saffron"] .auto-pay-toggle.active {
             background-color: #f97316;
             border-color: #fb923c;
@@ -712,45 +547,20 @@
 <script type="importmap">
 {
   "imports": {
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.32.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
-    "firebase/": "https://aistudiocdn.com/firebase@^12.6.0/",
-    "vite": "https://aistudiocdn.com/vite@^7.2.7",
-    "react/": "https://aistudiocdn.com/react@^19.2.1/",
-    "react": "https://aistudiocdn.com/react@^19.2.1",
-    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.10.1",
-    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.2"
+    "react/": "https://esm.sh/react@^19.2.1/",
+    "react": "https://esm.sh/react@^19.2.1",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.1/",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.10.1",
+    "@google/genai": "https://esm.sh/@google/genai@^1.32.0",
+    "firebase/": "https://esm.sh/firebase@^12.6.0/",
+    "vite": "https://esm.sh/vite@^7.2.7"
   }
 }
 </script>
 <link rel="stylesheet" href="/index.css">
 </head>
 <body data-theme="cosmic">
-    <div id="solar-system">
-        <div class="sun"></div>
-        <div class="planet-orbit mercury-orbit">
-            <div class="planet mercury"></div>
-        </div>
-        <div class="planet-orbit venus-orbit">
-            <div class="planet venus"></div>
-        </div>
-        <div class="planet-orbit moon-orbit">
-            <div class="planet moon"></div>
-        </div>
-        <div class="planet-orbit mars-orbit">
-            <div class="planet mars"></div>
-        </div>
-        <div class="planet-orbit jupiter-orbit">
-            <div class="planet jupiter"></div>
-        </div>
-        <div class="planet-orbit saturn-orbit">
-            <div class="planet saturn"></div>
-        </div>
-        <div class="planet-orbit rahu-ketu-orbit">
-            <div class="planet rahu"></div>
-            <div class="planet ketu"></div>
-        </div>
-    </div>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
 </body>

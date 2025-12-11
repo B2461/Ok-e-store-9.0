@@ -1,6 +1,6 @@
 {
   "name": "ok-e-store-9.1",
-  "description": "मोबाइल एसेसरीज इलेक्ट्रॉनिक एसेसरीज e-book बुक ज्वैलरी शूज खरीद सकते हैं",
+  "description": "Premium Online Shopping Store for Mobile Accessories, E-books, Jewelry, and Shoes.",
   "requestFramePermissions": [
     "camera",
     "microphone",

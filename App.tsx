@@ -1,35 +1,8 @@
-
 import React, { useState, useCallback, useEffect, useRef, createContext, useContext, useMemo } from 'react';
-import { Routes, Route, Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { DivinationType, CartItem, Order, CustomerDetails, Product, Notification, UserProfile, VerificationRequest, SupportTicket, SocialMediaPost, SubscriptionPlan } from '../types';
-import WelcomeScreen from './WelcomeScreen';
-import SelectionScreen from './SelectionScreen';
-import SettingsScreen from './SettingsScreen';
-import PujanSamagriStore from './PujanSamagriStore';
-import ProductDetailScreen from './ProductDetailScreen';
-import ShoppingCartScreen from './ShoppingCartScreen';
-import CheckoutScreen from './CheckoutScreen';
-import OrderConfirmationScreen from './OrderConfirmationScreen';
-import { products as initialProducts } from '../data/products';
-import { ebooks } from '../data/ebooks';
-import NotificationBell from './NotificationBell';
-import AdminScreen from './AdminScreen';
-import TermsAndConditions from './TermsAndConditions';
-import PrivacyPolicy from './PrivacyPolicy';
-import { toolCategories } from '../data/tools';
-import ProfileScreen from './ProfileScreen';
-import BottomNavBar from './BottomNavBar';
-import LoginScreen from './LoginScreen';
-import OrderHistoryScreen from './OrderHistoryScreen';
-import SupportTicketScreen from './SupportTicketScreen';
-import AudioPlayer from './AudioPlayer';
-import SearchModal from './SearchModal';
-import LocalMarketingScreen from './LocalMarketingScreen';
-import PremiumScreen from './PremiumScreen';
-import SubscriptionPaymentScreen from './SubscriptionPaymentScreen';
-import SubscriptionConfirmationScreen from './SubscriptionConfirmationScreen';
-import WishlistScreen from './WishlistScreen';
-import { subscribeToAuthChanges, loginUser, registerUser, logoutUser } from '../services/firebaseService';
+import { DivinationType, Order, SupportTicket, UserProfile } from './types';
+import LoginScreen from './components/LoginScreen';
+import { subscribeToAuthChanges, loginUser, registerUser, logoutUser } from './services/firebaseService';
+import AppComp from './components/App';
 
 // --- I18n Language & Auth System ---
 const translations = {
@@ -92,9 +65,9 @@ const translations = {
     recent_posts: 'हाल की पोस्ट्स',
     // Premium
     premium_unlock_title: 'प्रीमियम अनलॉक करें',
-    premium_unlock_subtitle: 'सभी ज्योतिष और AI टूल्स तक असीमित पहुंच प्राप्त करें।',
-    premium_trial_banner_title: 'मुफ्त ट्रायल उपलब्ध!',
-    premium_trial_banner_desc: 'आज ही साइन अप करें और 3 दिन मुफ्त पाएं।',
+    premium_unlock_subtitle: 'सभी तंत्र मंत्र यंत्र ई-बुक्स तक असीमित पहुंच प्राप्त करें।',
+    premium_trial_banner_title: 'ई-बुक्स का खजाना!',
+    premium_trial_banner_desc: 'अभी सब्सक्राइब करें और सभी PDF सीधे डाउनलोड करें।',
     premium_monthly_plan: 'मासिक प्लान',
     premium_yearly_plan: 'वार्षिक प्लान',
     premium_choose_plan: 'प्लान चुनें',
@@ -214,13 +187,16 @@ interface AppContextType {
     isAuthenticated: boolean;
     currentUser: UserProfile | null;
     showAuth: (onSuccess?: () => void) => void;
-    handleLogin: (email: string, password: string) => Promise<boolean>;
+    handleLogin: (email: string, password: string) => Promise<string | null>;
     handleSignup: (profileData: UserProfile) => Promise<boolean>;
     logout: () => void;
     deleteCurrentUser: () => void;
     updateProfile: (profile: UserProfile) => void;
     wishlist: string[];
     toggleWishlist: (productId: string) => void;
+    isPremiumActive: boolean;
+    setExtendedProfiles: React.Dispatch<React.SetStateAction<Record<string, UserProfile>>>;
+    setCurrentUser: React.Dispatch<React.SetStateAction<UserProfile | null>>;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -259,6 +235,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const [isAuthVisible, setIsAuthVisible] = useState(false);
     const [authSuccessCallback, setAuthSuccessCallback] = useState<(() => void) | null>(null);
 
+    // Check premium status
+    const isPremiumActive = useMemo(() => {
+        if (!currentUser?.subscriptionExpiry) return false;
+        return new Date(currentUser.subscriptionExpiry) > new Date();
+    }, [currentUser]);
+
     // Auth Subscription Effect
     useEffect(() => {
         const unsubscribe = subscribeToAuthChanges((firebaseUser) => {
@@ -275,7 +257,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                     dob: extendedData.dob,
                     timeOfBirth: extendedData.timeOfBirth,
                     placeOfBirth: extendedData.placeOfBirth,
-                    signupDate: extendedData.signupDate || new Date().toISOString()
+                    signupDate: extendedData.signupDate || new Date().toISOString(),
+                    subscriptionPlan: extendedData.subscriptionPlan,
+                    subscriptionExpiry: extendedData.subscriptionExpiry,
+                    isPremium: extendedData.isPremium
                 };
                 setCurrentUser(profile);
                 setIsAuthenticated(true);
@@ -315,15 +300,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (onSuccess) { setAuthSuccessCallback(() => onSuccess); }
     };
 
-    const handleLoginLogic = async (email: string, password: string): Promise<boolean> => {
+    const handleLoginLogic = async (email: string, password: string): Promise<string | null> => {
         try {
             await loginUser(email, password);
             setIsAuthVisible(false);
             if (authSuccessCallback) { authSuccessCallback(); setAuthSuccessCallback(null); }
-            return true;
-        } catch (error) {
+            return null; // Success
+        } catch (error: any) {
             console.error("Login failed", error);
-            return false;
+            
+            // DEMO FALLBACK for testing
+            if (email === 'demo@example.com' && password === 'password') {
+                const demoUser: UserProfile = {
+                    name: 'Demo User',
+                    email: 'demo@example.com',
+                    phone: '9876543210',
+                    signupDate: new Date().toISOString(),
+                    isPremium: true,
+                    subscriptionPlan: 'Yearly',
+                    subscriptionExpiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
+                };
+                setCurrentUser(demoUser);
+                setIsAuthenticated(true);
+                setIsAuthVisible(false);
+                if (authSuccessCallback) { authSuccessCallback(); setAuthSuccessCallback(null); }
+                return null;
+            }
+
+            // Return user friendly error message
+            if (error.code === 'auth/invalid-credential' || error.message.includes('invalid-credential')) {
+                return 'ईमेल या पासवर्ड गलत है।';
+            }
+            if (error.code === 'auth/user-not-found') {
+                return 'खाता नहीं मिला। कृपया साइन अप करें।';
+            }
+            if (error.code === 'auth/wrong-password') {
+                return 'गलत पासवर्ड।';
+            }
+            return 'लॉगिन विफल। कृपया पुनः प्रयास करें।';
         }
     };
     
@@ -390,8 +404,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const value: AppContextType = useMemo(() => ({
         language, setLanguage, theme, setTheme, t, tDiv, isAuthenticated, currentUser, showAuth, logout, deleteCurrentUser, updateProfile, 
         handleLogin: handleLoginLogic, handleSignup: handleSignupLogic,
-        wishlist, toggleWishlist
-    }), [language, theme, isAuthenticated, currentUser, t, tDiv, wishlist]);
+        wishlist, toggleWishlist, isPremiumActive, setExtendedProfiles, setCurrentUser
+    }), [language, theme, isAuthenticated, currentUser, t, tDiv, wishlist, isPremiumActive]);
 
     const contextWithSetters = { ...value, setOrders, setSupportTickets };
 
@@ -403,366 +417,4 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
 };
 
-const CartIcon: React.FC<{ isActive: boolean }> = ({ isActive }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={isActive ? 2.5 : 2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-    </svg>
-);
-
-const OrderIcon: React.FC<{ isActive: boolean }> = ({ isActive }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 transition-colors ${isActive ? 'text-black' : 'text-current'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={isActive ? 2.5 : 2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-    </svg>
-);
-
-const SearchIcon: React.FC<{ isActive: boolean }> = ({ isActive }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={isActive ? 2.5 : 2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-    </svg>
-);
-
-const HeartIcon: React.FC<{ isActive: boolean }> = ({ isActive }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 transition-colors ${isActive ? 'text-pink-500 fill-pink-500' : 'text-current'}`} fill={isActive ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={isActive ? 0 : 2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-    </svg>
-);
-
-const App: React.FC = () => {
-    const appContext = useContext(AppContext);
-    if (!appContext) return null;
-    const { currentUser, t, updateProfile, isAuthenticated, showAuth, wishlist } = appContext;
-    const { setOrders, setSupportTickets } = appContext as any;
-    
-    const navigate = useNavigate();
-    const location = useLocation();
-    
-    const [products, setProducts] = useState<Product[]>([...initialProducts, ...ebooks]);
-    const [cartItems, setCartItems] = useState<CartItem[]>(() => { try { const saved = localStorage.getItem('okFutureZoneCartItems'); return saved ? JSON.parse(saved) : []; } catch { return []; } });
-    const [orders, setOrdersState] = useState<Order[]>(() => { try { const saved = localStorage.getItem('okFutureZoneOrders'); return saved ? JSON.parse(saved) : []; } catch { return []; } });
-    const [notifications, setNotifications] = useState<Notification[]>(() => { try { const saved = localStorage.getItem('okFutureZoneNotifications'); return saved ? JSON.parse(saved) : []; } catch { return []; } });
-    const [pendingVerifications, setPendingVerifications] = useState<VerificationRequest[]>(() => { try { const saved = localStorage.getItem('okFutureZonePendingVerifications'); return saved ? JSON.parse(saved) : []; } catch { return []; } });
-    const [supportTickets, setSupportTicketsState] = useState<SupportTicket[]>(() => { try { const saved = localStorage.getItem('okFutureZoneSupportTickets'); return saved ? JSON.parse(saved) : []; } catch { return []; } });
-    const [socialMediaPosts, setSocialMediaPosts] = useState<SocialMediaPost[]>(() => { try { const saved = localStorage.getItem('okFutureZoneSocialMediaPosts'); return saved ? JSON.parse(saved) : []; } catch { return []; } });
-    const [categoryVisibility, setCategoryVisibility] = useState<Record<string, boolean>>(() => {
-        try { const saved = localStorage.getItem('okFutureZoneCategoryVisibility'); if (saved) { return JSON.parse(saved); } } catch {}
-        const defaultVisibility: Record<string, boolean> = {};
-        toolCategories.forEach(cat => { defaultVisibility[cat.name] = true; });
-        return defaultVisibility;
-    });
-    const [isSearchVisible, setIsSearchVisible] = useState(false);
-    const audioRef = useRef<HTMLAudioElement>(null);
-    const [selectedSubscriptionPlan, setSelectedSubscriptionPlan] = useState<(SubscriptionPlan & { autoRenew: boolean }) | null>(null);
-    const [isNotifOpen, setIsNotifOpen] = useState(false);
-
-    // Green Flash Logic States
-    const [flashCart, setFlashCart] = useState(false);
-    const [flashOrder, setFlashOrder] = useState(false);
-    const [flashNotif, setFlashNotif] = useState(false);
-
-    // Track previous lengths to detect additions
-    const prevCartLength = useRef(cartItems.length);
-    const prevOrderLength = useRef(orders.length);
-    const prevNotifLength = useRef(notifications.length);
-
-    // Global Click Listener for Green Flash Effect
-    useEffect(() => {
-        const handleGlobalClick = (e: MouseEvent) => {
-            const flash = document.createElement('div');
-            flash.className = 'click-flash-effect';
-            flash.style.left = `${e.clientX}px`;
-            flash.style.top = `${e.clientY}px`;
-            document.body.appendChild(flash);
-            setTimeout(() => {
-                if (document.body.contains(flash)) {
-                    document.body.removeChild(flash);
-                }
-            }, 500); // Remove after animation
-        };
-
-        window.addEventListener('click', handleGlobalClick);
-        return () => window.removeEventListener('click', handleGlobalClick);
-    }, []);
-
-    useEffect(() => { localStorage.setItem('okFutureZoneCartItems', JSON.stringify(cartItems)); }, [cartItems]);
-    useEffect(() => { localStorage.setItem('okFutureZoneOrders', JSON.stringify(orders)); setOrders(orders); }, [orders]);
-    useEffect(() => { localStorage.setItem('okFutureZoneNotifications', JSON.stringify(notifications)); }, [notifications]);
-    useEffect(() => { localStorage.setItem('okFutureZonePendingVerifications', JSON.stringify(pendingVerifications)); }, [pendingVerifications]);
-    useEffect(() => { localStorage.setItem('okFutureZoneSupportTickets', JSON.stringify(supportTickets)); setSupportTickets(supportTickets); }, [supportTickets]);
-    useEffect(() => { localStorage.setItem('okFutureZoneSocialMediaPosts', JSON.stringify(socialMediaPosts)); }, [socialMediaPosts]);
-    useEffect(() => { localStorage.setItem('okFutureZoneCategoryVisibility', JSON.stringify(categoryVisibility)); }, [categoryVisibility]);
-
-    // Flash Effects for Cart, Orders, Notifications
-    useEffect(() => {
-        if (cartItems.length > prevCartLength.current) {
-            setFlashCart(true);
-        }
-        prevCartLength.current = cartItems.length;
-    }, [cartItems]);
-
-    useEffect(() => {
-        if (orders.length > prevOrderLength.current) {
-            setFlashOrder(true);
-        }
-        prevOrderLength.current = orders.length;
-    }, [orders]);
-
-    useEffect(() => {
-        if (notifications.length > prevNotifLength.current) {
-            setFlashNotif(true);
-        }
-        prevNotifLength.current = notifications.length;
-    }, [notifications]);
-
-
-    // Automatic cleanup of orders older than 15 days
-    useEffect(() => {
-        const cleanupOldOrders = () => {
-            const FIFTEEN_DAYS_MS = 15 * 24 * 60 * 60 * 1000;
-            const now = Date.now();
-            
-            setOrdersState(prevOrders => {
-                const recentOrders = prevOrders.filter(order => {
-                    const orderDate = new Date(order.date).getTime();
-                    // Keep orders newer than 15 days
-                    return (now - orderDate) < FIFTEEN_DAYS_MS;
-                });
-                
-                if (recentOrders.length !== prevOrders.length) {
-                    console.log(`Cleaned up ${prevOrders.length - recentOrders.length} orders older than 15 days.`);
-                    return recentOrders;
-                }
-                return prevOrders;
-            });
-        };
-        
-        cleanupOldOrders();
-    }, []);
-
-    useEffect(() => {
-        const hasSeenWelcome = localStorage.getItem('okFutureZoneWelcomeNotif');
-        if (!hasSeenWelcome) {
-            setNotifications(prev => [
-                { id: `notif-${Date.now()}-1`, icon: '👋', title: 'welcome_notification_title', message: 'welcome_notification_message', timestamp: new Date().toISOString(), read: false },
-                { id: `notif-${Date.now()}-2`, icon: '🛍️', title: 'special_offer_title', message: 'special_offer_message', timestamp: new Date().toISOString(), read: false }, ...prev
-            ]);
-            localStorage.setItem('okFutureZoneWelcomeNotif', 'true');
-        }
-    }, []);
-    
-    // Notification Logic: 3 times a day (every 8 hours) with diverse categories
-    useEffect(() => {
-        // 8 hours in milliseconds
-        const NOTIFICATION_INTERVAL = 8 * 60 * 60 * 1000; 
-        const CHECK_INTERVAL = 5 * 60 * 1000; // Check every 5 mins
-
-        const notificationTemplates = [
-            { icon: '🔮', title: 'आज का राशिफल', message: 'जानें आज सितारे आपके बारे में क्या कहते हैं! अपना भविष्य देखें।' },
-            { icon: '👟', title: 'स्टाइल अलर्ट!', message: 'जूतों के नए कलेक्शन पर भारी छूट। अभी खरीदारी करें!' },
-            { icon: '📚', title: 'ज्ञान बढ़ाएं', message: 'नई ई-बुक्स अब उपलब्ध हैं। सफलता की ओर एक कदम बढ़ाएं।' },
-            { icon: '🕉️', title: 'आध्यात्मिक शांति', message: 'शुद्ध पूजन सामग्री और यंत्र घर मंगवाएं।' },
-            { icon: '🎧', title: 'गैजेट अपडेट', message: 'बेहतरीन मोबाइल एक्सेसरीज सबसे कम दाम में।' },
-            { icon: '💑', title: 'रिश्तों की बात', message: 'विवाह और प्रेम अनुकूलता की जांच करें।' },
-            { icon: '💎', title: 'चमकदार ऑफर', message: 'रत्न और आभूषणों पर विशेष छूट। अभी देखें!' },
-            { icon: '🧘', title: 'स्वास्थ्य और योग', message: 'स्वस्थ जीवन के लिए हमारे योग और आयुर्वेद गाइड पढ़ें।' },
-        ];
-
-        const sendProductNotification = () => {
-            const lastNotificationTime = parseInt(localStorage.getItem('okFutureZoneLastProductNotification') || '0', 10);
-            const now = Date.now();
-            
-            if (now - lastNotificationTime > NOTIFICATION_INTERVAL) {
-                // Pick a random template
-                const randomTemplate = notificationTemplates[Math.floor(Math.random() * notificationTemplates.length)];
-                
-                const newNotification: Notification = { 
-                    id: `auto-notif-${now}`, 
-                    icon: randomTemplate.icon, 
-                    title: randomTemplate.title, 
-                    message: randomTemplate.message, 
-                    timestamp: new Date().toISOString(), 
-                    read: false 
-                };
-                
-                setNotifications(prev => [newNotification, ...prev]);
-                localStorage.setItem('okFutureZoneLastProductNotification', now.toString());
-            }
-        };
-        
-        sendProductNotification();
-        const intervalId = setInterval(sendProductNotification, CHECK_INTERVAL);
-        return () => clearInterval(intervalId);
-    }, []);
-
-    const handleProtectedLink = (path: string) => {
-        if (isAuthenticated) { navigate(path); } else { showAuth(() => navigate(path)); }
-    };
-
-    const handleSelectDivinationType = (type: DivinationType) => {
-        switch (type) {
-            case DivinationType.PUJAN_SAMAGRI: navigate('/store/pujan-samagri'); break;
-            case DivinationType.TANTRA_MANTRA_YANTRA_EBOOK: navigate('/store/ebooks'); break;
-            case DivinationType.GEMS_JEWELRY: navigate('/store/gems-jewelry'); break;
-            case DivinationType.MOBILE_ACCESSORIES: navigate('/store/mobile-accessories'); break;
-            case DivinationType.LADIES_GENTS_BABY_SHOES: navigate('/store/shoes'); break;
-            case DivinationType.LADIES_GENTS_ACCESSORIES: navigate('/store/accessories'); break;
-            case DivinationType.DIVINATION_STORE: navigate('/store'); break;
-            default: break;
-        }
-    };
-    
-    const addToCart = (product: Product, quantity: number, color: string) => {
-        setCartItems(prev => {
-            const existingItem = prev.find(item => item.id === product.id && item.selectedColor === color);
-            if (existingItem) { return prev.map(item => item.id === product.id && item.selectedColor === color ? { ...item, quantity: item.quantity + quantity } : item); }
-            return [...prev, { ...product, quantity, selectedColor: color }];
-        });
-    };
-    
-    const onUpdateCartQuantity = (productId: string, color: string, newQuantity: number) => { setCartItems(prev => prev.map(item => item.id === productId && item.selectedColor === color ? { ...item, quantity: newQuantity > 0 ? newQuantity : 1 } : item)); };
-    const onRemoveCartItem = (productId: string, color: string) => { setCartItems(prev => prev.filter(item => !(item.id === productId && item.selectedColor === color))); };
-    
-    const onPlaceOrder = (customerDetails: CustomerDetails, total: number, paymentMethod: 'PREPAID' | 'COD', orderId: string) => {
-        const newOrder: Order = { id: orderId, items: cartItems, customer: customerDetails, total, date: new Date().toISOString(), status: paymentMethod === 'PREPAID' ? 'Verification Pending' : 'Processing', paymentMethod, paymentStatus: paymentMethod === 'PREPAID' ? 'VERIFICATION_PENDING' : 'PENDING' };
-        setOrdersState(prev => [...prev, newOrder]);
-        setCartItems([]);
-    };
-    
-    const onVerificationRequest = (request: Omit<VerificationRequest, 'id' | 'requestDate'>) => {
-        const newRequest: VerificationRequest = { ...request, id: `vr-${Date.now()}`, requestDate: new Date().toISOString() };
-        setPendingVerifications(prev => [...prev, newRequest]);
-    };
-    
-    const onApproveVerification = (requestId: string) => {
-        const request = pendingVerifications.find(r => r.id === requestId);
-        if (!request) return;
-        if (request.type === 'PRODUCT' && request.orderId) { setOrdersState(prevOrders => prevOrders.map(o => o.id === request.orderId ? { ...o, status: 'Processing', paymentStatus: 'COMPLETED' } : o)); }
-        setPendingVerifications(prev => prev.filter(r => r.id !== requestId));
-    };
-
-    const handleSelectPlan = (plan: SubscriptionPlan & { autoRenew: boolean }) => {
-        setSelectedSubscriptionPlan(plan);
-        navigate('/subscribe');
-    };
-
-    // --- Styling for Yellow Box Effect ---
-    const activeIconClass = "bg-yellow-400 text-black rounded-lg shadow-[0_0_15px_rgba(250,204,21,0.6)] transform scale-105 transition-all duration-300";
-    const inactiveIconClass = "hover:bg-white/10 text-white transition-colors duration-300";
-
-    return (
-        <div className="min-h-screen text-white p-4 pt-20 pb-32">
-            {isSearchVisible && <SearchModal products={products} onClose={() => setIsSearchVisible(false)} />}
-            <header className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-900 via-black to-orange-900 backdrop-blur-md h-20 flex items-center justify-between px-2 sm:px-4 border-b border-orange-700/50 shadow-[0_2px_15px_rgba(249,115,22,0.4)]">
-                <div className="flex items-center">
-                    <Link to="/home" className="flex items-center">
-                        <img 
-                            src="https://res.cloudinary.com/de2eehtiy/image/upload/v1765044615/logo_vnttdf.png" 
-                            alt="Ok-E-store" 
-                            className="h-16 w-auto object-contain" 
-                        />
-                    </Link>
-                </div>
-                <div className="flex items-center gap-1">
-                    <button 
-                        onClick={() => setIsSearchVisible(true)} 
-                        className={`flex flex-col items-center justify-center w-14 py-1 rounded-lg ${isSearchVisible ? activeIconClass : inactiveIconClass}`}
-                    >
-                        <SearchIcon isActive={isSearchVisible} />
-                        <span className="text-xs text-center font-medium mt-1">{t('search')}</span>
-                    </button>
-                    <Link 
-                        to="/wishlist" 
-                        className={`flex flex-col items-center justify-center w-14 py-1 rounded-lg ${location.pathname.startsWith('/wishlist') ? activeIconClass : inactiveIconClass}`}
-                    >
-                        <div className="relative">
-                            <HeartIcon isActive={location.pathname.startsWith('/wishlist')} />
-                            {wishlist.length > 0 && (
-                                <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center border border-black">
-                                    {wishlist.length}
-                                </span>
-                            )}
-                        </div>
-                        <span className="text-xs text-center font-medium mt-1">{t('wishlist')}</span>
-                    </Link>
-                    <div className={`flex flex-col items-center justify-center w-14 py-1 text-center rounded-lg ${isNotifOpen ? activeIconClass : inactiveIconClass} ${flashNotif ? 'animate-flash-green' : ''}`}>
-                        <NotificationBell 
-                            notifications={notifications} 
-                            onOpen={() => { setFlashNotif(false); setNotifications(prev => prev.map(n => ({ ...n, read: true }))); }} 
-                            onClear={() => setNotifications([])} 
-                            isOpen={isNotifOpen}
-                            onToggle={setIsNotifOpen}
-                        />
-                        <span className="text-xs font-medium mt-1">{t('notifications')}</span>
-                    </div>
-                    <button 
-                        onClick={() => { setFlashOrder(false); handleProtectedLink('/orders'); }} 
-                        className={`flex flex-col items-center justify-center w-14 py-1 rounded-lg ${location.pathname.startsWith('/orders') ? activeIconClass : inactiveIconClass} ${flashOrder ? 'animate-flash-green' : ''}`}
-                    >
-                        <OrderIcon isActive={location.pathname.startsWith('/orders')} />
-                        <span className="text-xs text-center font-medium mt-1">{t('my_orders')}</span>
-                    </button>
-                    <Link 
-                        to="/cart" 
-                        onClick={() => setFlashCart(false)} 
-                        className={`flex flex-col items-center justify-center w-14 py-1 rounded-lg ${location.pathname.startsWith('/cart') ? activeIconClass : inactiveIconClass} ${flashCart ? 'animate-flash-green' : ''}`}
-                    >
-                        <div className="relative">
-                            <CartIcon isActive={location.pathname.startsWith('/cart')} />
-                            {cartItems.length > 0 && (
-                                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center border border-black">
-                                    {cartItems.reduce((acc, item) => acc + item.quantity, 0) > 9 ? '9+' : cartItems.reduce((acc, item) => acc + item.quantity, 0)}
-                                </span>
-                            )}
-                        </div>
-                        <span className="text-xs font-medium mt-1">{t('cart')}</span>
-                    </Link>
-                </div>
-            </header>
-
-            <div className="container mx-auto max-w-7xl">
-                <Routes>
-                    <Route path="/" element={<WelcomeScreen onStart={() => navigate('/home')} />} />
-                    <Route path="/home" element={<SelectionScreen onSelect={handleSelectDivinationType} isPremiumActive={false} products={products} categoryVisibility={categoryVisibility} />} />
-                    <Route path="/store" element={<PujanSamagriStore products={products} />} />
-                    <Route path="/store/:categoryUrl" element={<PujanSamagriStore products={products} />} />
-                    <Route path="/product/:productId" element={<ProductDetailScreen products={products} addToCart={addToCart} />} />
-                    <Route path="/cart" element={<ShoppingCartScreen cartItems={cartItems} onUpdateQuantity={onUpdateCartQuantity} onRemoveItem={onRemoveCartItem} />} />
-                    <Route path="/checkout" element={<CheckoutScreen cartItems={cartItems} onPlaceOrder={onPlaceOrder} onVerificationRequest={onVerificationRequest} />} />
-                    <Route path="/orders" element={<OrderHistoryScreen orders={orders} />} />
-                    <Route path="/orders/:orderId" element={<OrderConfirmationScreen orders={orders} />} />
-                    <Route path="/profile" element={<ProfileScreen userProfile={currentUser} onUpdateProfile={updateProfile} />} />
-                    <Route path="/settings" element={<SettingsScreen audioRef={audioRef} />} />
-                    <Route path="/support" element={<SupportTicketScreen onCreateTicket={(ticket) => setSupportTicketsState(prev => [...prev, { ...ticket, id: `st-${Date.now()}`, status: 'Open', createdAt: new Date().toISOString() }])} />} />
-                    <Route path="/admin" element={<AdminScreen products={products} onUpdateProducts={setProducts} orders={orders} onUpdateOrders={setOrdersState} pendingVerifications={pendingVerifications} onApproveVerification={onApproveVerification} supportTickets={supportTickets} onUpdateTicket={(t) => setSupportTicketsState(p => p.map(x => x.id === t.id ? t : x))} socialMediaPosts={socialMediaPosts} onCreatePost={(post) => setSocialMediaPosts(p => [...p, {...post, id: `sm-${Date.now()}`, createdAt: new Date().toISOString()}])} onUpdatePost={(post) => setSocialMediaPosts(p => p.map(x => x.id === post.id ? post : x))} onDeletePost={(postId) => setSocialMediaPosts(p => p.filter(x => x.id !== postId))} categoryVisibility={categoryVisibility} onUpdateCategoryVisibility={setCategoryVisibility} />} />
-                    <Route path="/terms" element={<TermsAndConditions />} />
-                    <Route path="/privacy" element={<PrivacyPolicy />} />
-                    <Route path="/premium" element={<PremiumScreen onSelectPlan={handleSelectPlan} isTrialAvailable={true} onBack={() => navigate('/home')} />} />
-                    <Route path="/subscribe" element={<SubscriptionPaymentScreen plan={selectedSubscriptionPlan} userProfile={currentUser} onVerificationRequest={(req) => { onVerificationRequest(req); navigate('/subscription-confirmed'); }} onBack={() => navigate('/premium')} />} />
-                    <Route path="/subscription-confirmed" element={<SubscriptionConfirmationScreen expiryDate={null} />} />
-                    <Route path="/wishlist" element={<WishlistScreen products={products} />} />
-                </Routes>
-            </div>
-
-            <audio ref={audioRef} src="https://aistudio.google.com/static/sounds/background_music.mp3" loop autoPlay />
-            
-            <BottomNavBar cartItemCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)} />
-
-            <footer className="text-center text-xs text-orange-400/60 mt-12 pb-4">
-                <div className="flex justify-center mb-4">
-                    <img 
-                        src="https://res.cloudinary.com/de2eehtiy/image/upload/v1765084945/3cc7bb1a-d113-4add-b199-0cb4a8406248_qlnfld.png" 
-                        alt="Ok-E-store Banner" 
-                        className="w-full max-w-sm rounded-lg shadow-lg border border-orange-500/30" 
-                    />
-                </div>
-                <div className="flex justify-center items-center gap-4 mb-2">
-                    <Link to="/terms" className="hover:text-orange-300 transition underline">{t('terms_and_conditions')}</Link>
-                    <span className="text-orange-400/40">|</span>
-                    <Link to="/privacy" className="hover:text-orange-300 transition underline">{t('privacy_policy')}</Link>
-                </div>
-                <p>{t('copyright')}</p>
-            </footer>
-        </div>
-    );
-};
-
-export default App;
+export default AppComp;

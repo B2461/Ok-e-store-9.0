@@ -1,6 +1,4 @@
 
-
-
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { DivinationType, Product } from '../types';
@@ -8,7 +6,6 @@ import ToolShowcaseSlider from './ToolShowcaseSlider';
 import { useAppContext } from '../App';
 import ProductShowcaseSlider from './ProductShowcaseSlider';
 import TrendingVideoCollection from './TrendingVideoCollection';
-import { toolCategories } from '../data/tools';
 
 interface SelectionScreenProps {
     onSelect: (type: DivinationType) => void;
@@ -25,12 +22,10 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({ onSelect, isPremiumAc
 
     // -- Split products into distinct categories --
     
-    // Priority 1: E-books
     const ebookProducts = useMemo(() => 
         products.filter(p => p.category === 'Tantra Mantra Yantra E-book'),
     [products]);
 
-    // Other Spiritual
     const pujanProducts = useMemo(() => 
         products.filter(p => p.category === 'Pujan Samagri'),
     [products]);
@@ -39,7 +34,6 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({ onSelect, isPremiumAc
         products.filter(p => p.category === 'Gems & Jewelry'),
     [products]);
 
-    // Shopping Categories
     const mobileProducts = useMemo(() => 
         products.filter(p => p.category === 'Mobile Accessories'),
     [products]);
@@ -62,7 +56,7 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({ onSelect, isPremiumAc
         },
         { 
             id: 'product_ebooks', 
-            titleEn: 'TANTRA MANTRA YANTRA PDF E-BOOK', 
+            titleEn: 'PDF E-BOOKS', 
             titleHi: 'तंत्र मंत्र यन्त्र PDF E-book', 
             icon: '📚', 
             link: '/store/ebooks' 
@@ -83,15 +77,15 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({ onSelect, isPremiumAc
         },
         { 
             id: 'product_shoes', 
-            titleEn: 'LADIES, GENTS & BABY SHOES', 
+            titleEn: 'SHOES', 
             titleHi: 'लेडीज जेंट्स एंड बेबी शूज', 
             icon: '👟', 
             link: '/store/shoes' 
         },
         { 
             id: 'product_accessories', 
-            titleEn: 'LADIES & GENTS ACCESSORIES', 
-            titleHi: 'लेडीज एंड जेंट्स पर्स बैग बेल्ट चाबी का गुच्छा', 
+            titleEn: 'ACCESSORIES', 
+            titleHi: 'लेडीज एंड जेंट्स पर्स बैग बेल्ट', 
             icon: '👜', 
             link: '/store/accessories' 
         }
@@ -127,7 +121,6 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({ onSelect, isPremiumAc
             <TrendingVideoCollection products={products} />
 
             <div className="space-y-12 mb-12">
-                {/* 1. E-books (Priority) */}
                 {isVisible('product_ebooks') && (
                     <ProductShowcaseSlider
                         title={tDiv(DivinationType.TANTRA_MANTRA_YANTRA_EBOOK).hi}
@@ -136,7 +129,6 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({ onSelect, isPremiumAc
                     />
                 )}
 
-                {/* 2. Mobile Accessories (Moved here as requested) */}
                 {isVisible('product_mobile') && (
                     <ProductShowcaseSlider
                         title={tDiv(DivinationType.MOBILE_ACCESSORIES).hi}
@@ -145,7 +137,6 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({ onSelect, isPremiumAc
                     />
                 )}
 
-                {/* 3. Pujan Samagri */}
                 {isVisible('product_pujan') && (
                     <ProductShowcaseSlider
                         title={tDiv(DivinationType.PUJAN_SAMAGRI).hi}
@@ -154,7 +145,6 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({ onSelect, isPremiumAc
                     />
                 )}
 
-                {/* 4. Gems & Jewelry */}
                 {isVisible('product_gems') && (
                     <ProductShowcaseSlider
                         title={tDiv(DivinationType.GEMS_JEWELRY).hi}
@@ -163,7 +153,6 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({ onSelect, isPremiumAc
                     />
                 )}
 
-                {/* 5. Shoes */}
                 {isVisible('product_shoes') && (
                     <ProductShowcaseSlider
                         title={tDiv(DivinationType.LADIES_GENTS_BABY_SHOES).hi}
@@ -172,7 +161,6 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({ onSelect, isPremiumAc
                     />
                 )}
 
-                {/* 6. Accessories */}
                 {isVisible('product_accessories') && (
                     <ProductShowcaseSlider
                         title={tDiv(DivinationType.LADIES_GENTS_ACCESSORIES).hi}
